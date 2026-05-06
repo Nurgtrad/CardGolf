@@ -2,13 +2,13 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>LINKS — Golf Tour</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#0a0f0a;
+  --bg:#050805;
   --surface:#111811;
   --surface2:#182018;
   --border:#2a3a2a;
@@ -18,39 +18,44 @@
   --accent2:#d4a832;
   --danger:#e84832;
 }
-html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;overflow:hidden}
-#game{display:flex;flex-direction:column;height:100vh;max-width:900px;margin:0 auto;position:relative}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;overflow:hidden;touch-action:none}
+/* FIX IOS: Uso de 100dvh para evitar la barra de navegación en Safari/Brave */
+#game{display:flex;flex-direction:column;height:100%;height:100dvh;max-width:900px;margin:0 auto;position:relative}
 
 /* HUD TOP */
-#hud{display:flex;justify-content:space-between;align-items:flex-start;padding:16px 20px 10px;background:linear-gradient(to bottom,rgba(10,15,10,0.95),transparent);position:absolute;top:0;left:0;right:0;z-index:20;pointer-events:none}
+#hud{display:flex;justify-content:space-between;align-items:flex-start;padding:16px 20px 10px;background:linear-gradient(to bottom,rgba(5,8,5,0.95),transparent);position:absolute;top:0;left:0;right:0;z-index:20;pointer-events:none}
 .hud-stat{text-align:center}
 .hud-label{font-size:9px;letter-spacing:0.2em;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px}
 .hud-value{font-size:22px;font-weight:300;color:var(--accent);font-family:'DM Serif Display',serif;line-height:1}
 .hud-value.small{font-size:14px}
 
-/* WIND INDICATOR */
+/* WIND */
 #wind-widget{display:flex;flex-direction:column;align-items:center;gap:4px}
 #wind-flag-wrap{position:relative;width:40px;height:40px}
-#wind-flag-svg{width:40px;height:40px}
 .wind-speed{font-size:11px;color:var(--accent2);font-weight:500;letter-spacing:0.05em}
 
 /* CANVAS */
-#canvas-wrap{flex:1;position:relative;overflow:hidden; cursor:crosshair; touch-action:none;}
+#canvas-wrap{flex:1;position:relative;overflow:hidden; cursor:crosshair;}
 canvas{position:absolute;top:0;left:0;width:100%;height:100%}
 #c-course{z-index:1}
 #c-ball{z-index:2}
 #c-ui{z-index:3}
 
 /* BOTTOM PANEL */
-#bottom{position:absolute;bottom:0;left:0;right:0;z-index:20;background:linear-gradient(to top,rgba(10,15,10,0.98) 70%,transparent);padding:14px 20px 20px}
-
+/* FIX IOS: safe-area-inset-bottom para separar el panel del indicador Home del iPhone */
+#bottom{position:absolute;bottom:0;left:0;right:0;z-index:20;background:linear-gradient(to top,rgba(5,8,5,0.98) 75%,transparent);padding:14px 20px calc(20px + env(safe-area-inset-bottom))}
 #dist-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:0 2px}
 .dist-label{font-size:9px;letter-spacing:0.15em;color:var(--text-muted);text-transform:uppercase}
-.dist-val{font-size:13px;color:var(--accent);font-weight:500}
+.dist-val{font-size:13px;color:var(--accent);font-weight:500;display:flex;flex-direction:column;}
 
-/* CARDS */
-#cards-row{display:flex;gap:6px;justify-content:center;margin-bottom:12px}
-.card{width:78px;height:110px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all 0.18s;padding:8px 6px;text-align:center;user-select:none}
+/* CARDS & DECK */
+#hand-container{display:flex;gap:12px;justify-content:center;align-items:center;margin-bottom:12px}
+#deck-pile{display:flex;flex-direction:column;align-items:center;justify-content:center;width:40px;height:60px;border:2px dashed var(--border);border-radius:6px;background:rgba(0,0,0,0.5)}
+.deck-count{font-size:14px;color:var(--text-muted);font-family:'DM Serif Display',serif}
+.deck-label{font-size:7px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:4px}
+
+#cards-row{display:flex;gap:6px;justify-content:center;}
+.card{width:76px;height:108px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all 0.1s;padding:8px 6px;text-align:center;user-select:none}
 .card:hover{border-color:var(--accent);background:var(--surface2);transform:translateY(-4px)}
 .card.selected{border-color:var(--accent);background:var(--surface2);transform:translateY(-6px);box-shadow:0 0 18px rgba(168,216,120,0.25)}
 .card.ball-card{border-color:rgba(212,168,50,0.5)}
@@ -61,54 +66,55 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%}
 .card-dist.gold{color:var(--accent2)}
 .card-sub{font-size:8px;color:var(--text-muted);margin-top:2px;line-height:1.2}
 .card-type{position:absolute;top:5px;right:6px;font-size:8px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em}
+.card-badge{position:absolute;top:-6px;left:-6px;background:var(--accent2);color:#000;font-size:10px;font-weight:bold;width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;z-index:2}
 
 /* METERS */
 #meters-row{display:flex;gap:10px;align-items:flex-end}
 #meter-power{flex:1}
 #meter-aim{flex:1}
 .meter-label{font-size:9px;letter-spacing:0.15em;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px}
-.meter-track{height:10px;background:var(--surface2);border-radius:5px;border:1px solid var(--border);position:relative;overflow:hidden;}
+.meter-track{height:12px;background:var(--surface2);border-radius:6px;border:1px solid var(--border);position:relative;overflow:hidden;}
 .meter-fill{height:100%;border-radius:4px;transition:none;position:absolute;top:0;left:0}
 #power-fill{background:linear-gradient(to right,#3d9a3d,#a8d878,#d4a832,#e84832)}
 #aim-fill{background:var(--accent);width:4px;left:50%;transform:translateX(-50%);border-radius:2px}
-#aim-cursor{position:absolute;top:-3px;width:10px;height:16px;background:var(--accent);border-radius:3px;transform:translateX(-50%);left:50%}
+#aim-cursor{position:absolute;top:-2px;width:12px;height:16px;background:var(--accent);border-radius:3px;transform:translateX(-50%);left:50%}
 .meter-action{margin-top:6px;font-size:9px;letter-spacing:0.1em;color:var(--text-muted);text-align:center}
 
-#shoot-btn{padding:10px 22px;background:var(--accent);color:#0a150a;border:none;border-radius:6px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;font-weight:500;transition:all 0.15s;align-self:flex-end;min-width:80px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;user-select:none;}
-#shoot-btn:hover:not(:disabled){background:#c0e890;transform:scale(1.02)}
+#shoot-btn{padding:12px 22px;background:var(--accent);color:#0a150a;border:none;border-radius:6px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;font-weight:bold;transition:all 0.1s;align-self:flex-end;min-width:90px;user-select:none;}
+#shoot-btn:active:not(:disabled){transform:scale(0.95)}
 #shoot-btn:disabled{background:var(--surface2);color:var(--text-muted);cursor:not-allowed;transform:none}
 
 /* OVERLAYS */
-.overlay{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(10,15,10,0.92);flex-direction:column;gap:16px;display:none;padding:20px;backdrop-filter:blur(4px)}
+.overlay{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(5,8,5,0.95);flex-direction:column;gap:16px;display:none;padding:20px;backdrop-filter:blur(4px)}
 .msg-title{font-family:'DM Serif Display',serif;font-size:36px;color:var(--accent);text-align:center}
 .msg-sub{font-size:13px;color:var(--text-muted);letter-spacing:0.1em;text-align:center;max-width:600px;line-height:1.5}
-.msg-btn{padding:12px 32px;background:var(--accent);color:#0a150a;border:none;border-radius:6px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;font-weight:500;transition:all 0.15s;margin-top:10px}
-.msg-btn:hover:not(:disabled){background:#c0e890}
+.msg-btn{padding:12px 32px;background:var(--accent);color:#0a150a;border:none;border-radius:6px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;font-weight:bold;margin-top:10px}
 .msg-btn:disabled{background:var(--surface2);color:var(--text-muted);cursor:not-allowed;}
-.warning{color:var(--danger);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;margin-top:20px;border:1px solid var(--danger);padding:8px 12px;border-radius:4px;background:rgba(232,72,50,0.1)}
 
-#score-table{display:grid;grid-template-columns:1fr 1fr;gap:20px;width:100%;max-width:500px}
-.score-col{display:flex;flex-direction:column;gap:4px}
-.score-row{display:flex;justify-content:space-between;gap:10px;font-size:11px;color:var(--text-muted);border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:2px}
-.score-row.total{color:var(--accent);border-top:1px solid var(--border);border-bottom:none;padding-top:6px;margin-top:2px}
-.score-val{font-weight:500}
+.warning{color:#ff6b6b;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;margin-top:15px;border:1px solid #ff6b6b;padding:12px;border-radius:6px;background:rgba(255,107,107,0.15);font-weight:bold;text-align:center;line-height:1.4}
 
-/* DECK BUILDER */
-#deck-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:800px;max-height:60vh;overflow-y:auto;padding:10px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+#deck-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:800px;max-height:60vh;overflow-y:auto;padding:10px;align-content:flex-start}
 #deck-counter{font-family:'DM Serif Display',serif;font-size:24px;color:var(--accent2);margin-bottom:-5px}
 
+/* SCORE TABLE REDESIGN */
+#score-table-wrap { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 4px; font-family: 'DM Mono', monospace; font-size: 13px; margin-top: 20px;}
+.sc-header { display: flex; justify-content: space-between; color: var(--accent2); font-size: 10px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 6px; margin-bottom: 4px; text-transform: uppercase; }
+.sc-row { display: flex; justify-content: space-between; padding: 4px 0; color: var(--text); }
+.sc-row span { flex: 1; text-align: center; }
+.sc-row span:first-child { text-align: left; }
+.sc-row span:last-child { text-align: right; }
+.sc-row.total { border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 8px; margin-top: 4px; font-weight: bold; color: var(--accent); }
+
 @media (max-width: 600px) {
-  .card { width: 56px; height: 86px; padding: 4px; border-radius: 6px; }
+  .card { width: 52px; height: 80px; padding: 4px; border-radius: 6px; }
   .card-icon { font-size: 14px; margin-bottom: 2px; }
   .card-name { font-size: 8px; margin-bottom: 2px; }
   .card-dist { font-size: 13px; }
-  .card-sub { font-size: 7px; display: none; }
-  .card-type { font-size: 7px; top: 4px; right: 4px; }
-  .hud-value { font-size: 18px; }
-  #bottom { padding: 10px 10px 14px; }
-  #shoot-btn { padding: 10px 12px; min-width: 70px; font-size: 10px; }
-  #cards-row { gap: 4px; }
-  #score-table{grid-template-columns:1fr;}
+  .card-sub { display: none; }
+  .card-type { display: none; }
+  .card-badge { width:16px; height:16px; font-size:9px; top:-4px; left:-4px; }
+  #bottom { padding: 10px 10px calc(14px + env(safe-area-inset-bottom)); }
+  #deck-pile { width: 34px; height: 50px; }
 }
 </style>
 </head>
@@ -123,10 +129,12 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%}
         <svg id="wind-flag-svg" viewBox="0 0 40 40" fill="none">
           <line x1="20" y1="4" x2="20" y2="36" stroke="#3d6b3d" stroke-width="1.5"/>
           <polygon id="flag-shape" points="20,6 34,12 20,18" fill="#e84832" opacity="0.9"/>
-          <text id="wind-dir-text" x="20" y="38" font-family="DM Mono,monospace" font-size="6" fill="#7a9a7a" text-anchor="middle"></text>
         </svg>
       </div>
-      <div class="wind-speed" id="wind-text">0 m/s</div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:4px; margin-top:2px;">
+         <div class="wind-speed" id="wind-text">0 m/s</div>
+         <div id="wind-arrow" style="color:var(--accent2); font-size:13px; line-height:1; display:inline-block; transform-origin:center;">➔</div>
+      </div>
     </div>
     <div class="hud-stat"><div class="hud-label">Golpes</div><div class="hud-value" id="h-strokes">0</div></div>
     <div class="hud-stat"><div class="hud-label">Score</div><div class="hud-value small" id="h-score">E</div></div>
@@ -141,13 +149,21 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%}
   <div id="bottom">
     <div id="dist-info">
       <div><div class="dist-label">Distancia al hoyo</div><div class="dist-val" id="d-hole">— m</div></div>
-      <div style="text-align:center"><div class="dist-label">Alcance estimado</div><div class="dist-val" id="d-reach">— m</div></div>
+      <div style="text-align:center"><div class="dist-label">Alcance estimado</div><div class="dist-val" id="d-reach" style="align-items:center">— m</div></div>
       <div style="text-align:right"><div class="dist-label">Posición</div><div class="dist-val" id="d-pos">Tee</div></div>
     </div>
-    <div id="cards-row"></div>
+    
+    <div id="hand-container">
+      <div id="deck-pile">
+        <div class="deck-count" id="deck-count">16</div>
+        <div class="deck-label">Mazo</div>
+      </div>
+      <div id="cards-row"></div>
+    </div>
+
     <div id="meters-row">
-      <div id="meter-power"><div class="meter-label">Fuerza</div><div class="meter-track" id="power-track"><div class="meter-fill" id="power-fill" style="width:0%"></div></div><div class="meter-action">Mantén botón / ESPACIO</div></div>
-      <div id="meter-aim"><div class="meter-label">Dirección</div><div class="meter-track" id="aim-track" style="overflow:visible"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:2px;height:16px;background:var(--border);border-radius:1px"></div><div id="aim-cursor"></div></div><div class="meter-action">Pulsa botón / ESPACIO</div></div>
+      <div id="meter-power"><div class="meter-label">Fuerza</div><div class="meter-track" id="power-track"><div class="meter-fill" id="power-fill" style="width:0%"></div></div><div class="meter-action">Botón o Espacio</div></div>
+      <div id="meter-aim"><div class="meter-label">Dirección</div><div class="meter-track" id="aim-track"><div style="position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);width:2px;background:var(--border);"></div><div id="aim-cursor"></div></div><div class="meter-action">Centra para precisión</div></div>
       <button id="shoot-btn" disabled>GOLPEAR</button>
     </div>
   </div>
@@ -155,103 +171,112 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%}
   <div id="msg-overlay" class="overlay">
     <div class="msg-title" id="msg-title">LINKS</div>
     <div class="msg-sub" id="msg-sub">Golf Procedural · 18 Hoyos</div>
-    <button class="msg-btn" id="msg-btn">Comenzar</button>
-    <div class="warning" id="msg-warn" style="display:none">⚠️ AVISO: Refrescar el navegador borrará tu progreso y tu colección de cartas.</div>
+    <div class="warning" id="msg-warn" style="display:none">⚠️ ADVERTENCIA<br>Refrescar el navegador borrará tu progreso y tu colección de cartas para siempre.</div>
+    <button class="msg-btn" id="msg-btn">Jugar</button>
+    <div id="version-text" style="margin-top:10px; font-size:10px; color:var(--text-muted); letter-spacing:0.1em; text-transform:uppercase; display:none;">CardGolf by Nurgtrad. Ver. 0.2.9</div>
   </div>
 
   <div id="deck-overlay" class="overlay">
     <div class="msg-title" id="deck-title">Prepara tu Bolsa</div>
-    <div class="msg-sub" id="deck-sub">Selecciona 15 cartas de tu colección para jugar esta ronda.</div>
-    <div id="deck-counter">0 / 15</div>
+    <div class="msg-sub" id="deck-sub">Selecciona exactamente 16 cartas. Puedes llevar hasta 2 copias de la misma.</div>
+    <div id="deck-counter">0 / 16</div>
     <div id="deck-grid"></div>
-    <button class="msg-btn" id="deck-btn" disabled>Confirmar</button>
+    <button class="msg-btn" id="deck-btn" disabled>Confirmar Mazo</button>
   </div>
 
   <div id="score-overlay" class="overlay">
-    <div class="msg-title" id="score-title">Tarjeta de Puntuación</div>
+    <div class="msg-title" id="score-title">Tarjeta</div>
     <div class="msg-sub" id="score-sub"></div>
-    <div id="score-table">
-      <div class="score-col" id="score-front"></div>
-      <div class="score-col" id="score-back"></div>
-    </div>
+    <div id="score-table-wrap"></div>
     <button class="msg-btn" id="score-btn">Continuar</button>
+  </div>
+
+  <div id="card-confirm-overlay" class="overlay" style="z-index: 40;">
+    <div class="msg-title" id="cc-title" style="font-size: 28px;">Usar Carta</div>
+    <div id="cc-desc" style="color:var(--accent2); font-size:14px; margin: 5px 0; text-transform:uppercase; letter-spacing: 0.1em;"></div>
+    <div class="msg-sub" id="cc-sub">¿Quieres gastar este objeto para el próximo tiro?</div>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+        <button class="msg-btn" id="cc-btn-cancel" style="background:var(--surface2); color:var(--text);">Cancelar</button>
+        <button class="msg-btn" id="cc-btn-accept">Aceptar</button>
+    </div>
   </div>
 </div>
 
 <script>
 const $ = id => document.getElementById(id);
 
-// ─── BASE DATA ───────────────────────────────────────────────────────────────
-const INITIAL_COLLECTION = [
-  {name:'Driver',   dist:240, icon:'🏌', type:'club'},
-  {name:'3 Wood',   dist:215, icon:'🌲', type:'club'},
-  {name:'5 Wood',   dist:200, icon:'🌲', type:'club'},
-  {name:'3 Iron',   dist:190, icon:'⛳', type:'club'},
-  {name:'4 Iron',   dist:180, icon:'⛳', type:'club'},
-  {name:'5 Iron',   dist:170, icon:'⛳', type:'club'},
-  {name:'6 Iron',   dist:160, icon:'⛳', type:'club'},
-  {name:'7 Iron',   dist:150, icon:'⛳', type:'club'},
-  {name:'8 Iron',   dist:140, icon:'⛳', type:'club'},
-  {name:'9 Iron',   dist:130, icon:'⛳', type:'club'},
-  {name:'Pitch W',  dist:110, icon:'🎯', type:'club'},
-  {name:'Gap W',    dist:95,  icon:'🎯', type:'club'},
-  {name:'Sand W',   dist:80,  icon:'⏳', type:'club'},
-  {name:'Lob W',    dist:60,  icon:'📐', type:'club'},
+// ─── DATA ────────────────────────────────────────────────────────────────────
+const CARDS_POOL = [
+  {id:'d', name:'Driver', dist:240, icon:'🏌', type:'club'},
+  {id:'3w', name:'3 Wood', dist:215, icon:'🌲', type:'club'},
+  {id:'5w', name:'5 Wood', dist:200, icon:'🌲', type:'club'},
+  {name:'3 Iron', dist:190, icon:'⛳', type:'club'},
+  {name:'4 Iron', dist:180, icon:'⛳', type:'club'},
+  {name:'5 Iron', dist:170, icon:'⛳', type:'club'},
+  {name:'6 Iron', dist:160, icon:'⛳', type:'club'},
+  {name:'7 Iron', dist:150, icon:'⛳', type:'club'},
+  {name:'8 Iron', dist:140, icon:'⛳', type:'club'},
+  {name:'9 Iron', dist:130, icon:'⛳', type:'club'},
+  {name:'Pitch W', dist:110, icon:'🎯', type:'club'},
+  {name:'Gap W', dist:95,  icon:'🎯', type:'club'},
+  {name:'Sand W', dist:80,  icon:'⏳', type:'club'},
+  {name:'Lob W', dist:60,  icon:'📐', type:'club'},
   
-  {name:'Control',  icon:'🎱', effect:'control',  desc:'-60% desvío', type:'ball'},
-  {name:'Power',    icon:'💥', effect:'power',    desc:'+20% dist.', type:'ball'},
-  {name:'Backroll', icon:'↩',  effect:'backroll', desc:'Retroceso', type:'ball'},
+  {id:'scope', name:'Scope', icon:'🔭', effect:'guide', desc:'Visualiza trayectoria de tiro', type:'ball'},
+  {name:'Control', icon:'🎱', effect:'control', desc:'-60% desvío', type:'ball'},
+  {name:'Power', icon:'💥', effect:'power', desc:'+20% dist.', type:'ball'},
+  {name:'Backroll', icon:'↩', effect:'backroll', desc:'Retroceso', type:'ball'},
   {name:'Fallstop', icon:'📍', effect:'fallstop', desc:'0 rodadura', type:'ball'},
-  {name:'Heavy',    icon:'🪨', effect:'heavy',    desc:'Ignora viento', type:'ball'},
-  {name:'Runner',   icon:'💨', effect:'runner',   desc:'Doble rodadura', type:'ball'},
+  {name:'Heavy', icon:'🪨', effect:'heavy', desc:'Ignora viento', type:'ball'},
 ];
+CARDS_POOL.forEach((c,i) => c.baseId = c.id || `c${i}`);
 
-const BASE_BALL_EFFECTS = [
-  {icon:'🎱', effect:'control',  desc:'Menos desvío'},
-  {icon:'💥', effect:'power',    desc:'+20% dist.'},
-  {icon:'↩',  effect:'backroll', desc:'Retroceso'},
-  {icon:'📍', effect:'fallstop', desc:'0 rodadura'},
-  {icon:'🪨', effect:'heavy',    desc:'Ignora viento'},
-  {icon:'💨', effect:'runner',   desc:'Doble rodadura'},
-];
-
-const PUTTER_CARD = {name:'Putt', dist:30, icon:'🕳', type:'club', isPutt:true};
-
-// Layout de pares clásico de 18 hoyos (Par 72)
+const PUTTER_CARD = {baseId:'putt', name:'Putt', dist:30, icon:'🕳', type:'club', isPutt:true};
 const HOLE_PARS = [4,4,3,5,4,3,4,5,4, 4,3,4,4,5,4,3,5,4];
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
 let state = {
-  collection: [], // Permanent cards
-  activeDeck: [], // 15 cards selected for the round
-  hand: [],       // Up to 5 cards currently held
-  
-  hole: 0,
-  totalScore: 0,
-  scores: [],
-  holeData: null,
-  ball: {x:0, y:0},
-  target: {x:0, y:0},
-  strokes: 0,
-  phase: 'card_select', 
-  selectedClub: null, 
-  selectedBall: null, 
-  
-  wind: {speed:0, dir:0},
-  powerVal: 0, powerDir: 1, powerHeld: false,
-  aimVal: 0.5, aimDir: 1,
-  ballAnim: null,
-  
-  draftingLimits: { expected: 15, current: [] }
+  collection: [], deckConfig: {}, drawPile: [], discardPile: [], hand: [],
+  hole: 0, totalScore: 0, scores: [], holeData: null,
+  ball: {x:0, y:0}, target: {x:0, y:0}, prevPos: {x:0, y:0}, currentTerrain: 'tee',
+  strokes: 0, phase: 'card_select', selectedClub: null, selectedBall: null, itemLocked: false,
+  wind: {speed:0, dir:0}, powerVal: 0, powerDir: 1, powerHeld: false, aimVal: 0.5, aimDir: 1,
+  ballAnim: null, cachedPattern: null, paths: {}
 };
 
 // ─── UTILS ───────────────────────────────────────────────────────────────────
-function generateUID() { return Math.random().toString(36).substr(2, 9); }
-function cloneCard(c) { return {...c, uid: generateUID()}; }
+function cloneCard(c) { return {...c, uid: Math.random().toString(36).substr(2, 9)}; }
+function shuffle(array) {
+  for(let i=array.length-1; i>0; i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
 
-// ─── CANVAS SETUP ────────────────────────────────────────────────────────────
+function autoSelectBestClub() {
+  let bestClub = null;
+  let minDiff = Infinity;
+  state.hand.forEach(c => {
+    if(c.type === 'club') {
+      if(state.currentTerrain === 'green') {
+        if(c.isPutt) bestClub = c;
+      } else if (!c.isPutt) {
+         let diff = Math.abs(c.dist - state.distToHole);
+         if (diff < minDiff) { minDiff = diff; bestClub = c; }
+      }
+    }
+  });
+  if (bestClub) {
+      state.selectedClub = bestClub.uid;
+      state.selectedBall = null; 
+      renderCards(); updateShootBtnUI(); updateReachDisplay(); drawUI();
+  }
+}
+
+// ─── CANVAS & INPUT ──────────────────────────────────────────────────────────
 const cCourse = $('c-course'), cBall = $('c-ball'), cUI = $('c-ui');
-const ctxC = cCourse.getContext('2d'); const ctxB = cBall.getContext('2d'); const ctxU = cUI.getContext('2d');
+const ctxC = cCourse.getContext('2d'), ctxB = cBall.getContext('2d'), ctxU = cUI.getContext('2d');
 
 function resizeCanvases() {
   const wrap = $('canvas-wrap');
@@ -262,150 +287,301 @@ window.addEventListener('resize', resizeCanvases);
 
 function updateAimTarget(e) {
   if (state.phase !== 'card_select') return;
+  e.preventDefault();
   const rect = cUI.getBoundingClientRect();
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
   const clientY = e.touches ? e.touches[0].clientY : e.clientY;
   state.target = { x: clientX - rect.left, y: clientY - rect.top };
   drawUI();
 }
-$('c-ui').addEventListener('pointerdown', updateAimTarget);
-$('c-ui').addEventListener('pointermove', (e) => { if(e.buttons > 0) updateAimTarget(e); });
+cUI.addEventListener('touchstart', updateAimTarget, {passive: false});
+cUI.addEventListener('touchmove', updateAimTarget, {passive: false});
+cUI.addEventListener('mousedown', updateAimTarget);
+cUI.addEventListener('mousemove', (e) => { if(e.buttons > 0) updateAimTarget(e); });
 
-// ─── PROCEDURAL COURSE (NO PATH2D, UNIVERSAL COMPATIBILITY) ──────────────────
+// ─── PROCEDURAL COURSE ───────────────────────────────────────────────────────
 function generateHole(holeIndex) {
-  const W = cCourse.width, H = cCourse.height;
-  const par = HOLE_PARS[holeIndex];
-  
-  let logicalDist = par === 3 ? 150 + Math.random()*40 : par === 4 ? 320 + Math.random()*80 : 480 + Math.random()*60;
+  const W = cCourse.width, H = cCourse.height, par = HOLE_PARS[holeIndex];
+  const logicalDist = par === 3 ? 150+Math.random()*30 : par === 4 ? 330+Math.random()*70 : 490+Math.random()*60;
   const difficulty = holeIndex / 17;
-  
-  const visualLengthPx = H * 0.57; 
+  const visualLengthPx = H * 0.60; 
   const scale = visualLengthPx / logicalDist;
   
-  const teeX = W/2, teeY = H * 0.75;
-  const holeX = W/2 + (Math.random()-0.5)*W*(0.2 + difficulty*0.2);
+  const teeX = W/2, teeY = H * 0.8;
+  const holeX = W/2 + (Math.random()-0.5)*W*(0.2 + difficulty*0.4);
   const holeY = teeY - visualLengthPx;
   
-  const cp1x = W/2 + (Math.random()-0.5)*W*0.3;
-  const cp1y = teeY - visualLengthPx*0.25;
-  const cp2x = (holeX + W/2)/2 + (Math.random()-0.5)*W*(0.1 + difficulty*0.2);
-  const cp2y = teeY - visualLengthPx*0.6;
+  const dev1 = (Math.random()-0.5) * W * (0.3 + difficulty * 0.5);
+  const dev2 = (Math.random()-0.5) * W * (0.3 + difficulty * 0.5);
+  const cp1x = W/2 + dev1, cp1y = teeY - visualLengthPx*(0.2 + Math.random()*0.2);
+  const cp2x = holeX + dev2, cp2y = teeY - visualLengthPx*(0.5 + Math.random()*0.3);
   
-  const fairwayW = (80 - difficulty*20) + Math.random()*20;
+  const fairwayW = Math.max(45, 90 - difficulty*35) + Math.random()*20;
   
+  const fNoise = {
+     l1: Math.random()*Math.PI*2, l2: Math.random()*Math.PI*2, r1: Math.random()*Math.PI*2, r2: Math.random()*Math.PI*2,
+     srL1: Math.random()*Math.PI*2, srL2: Math.random()*Math.PI*2, srR1: Math.random()*Math.PI*2, srR2: Math.random()*Math.PI*2
+  };
+  
+  const isSplitHole = par >= 4 && (Math.random() < 0.2 + difficulty * 0.3);
+  let gapStartT = 0.45 + Math.random()*0.1, gapEndT = gapStartT + 0.12 + Math.random()*0.08;
+
   let sandTraps = [];
-  const numSand = (par === 3 ? 0 : 1) + Math.floor(difficulty * 3) + (Math.random()>0.5?1:0);
+  const numSand = (par===3?1:2) + Math.floor(difficulty*4);
   for(let i=0;i<numSand;i++) {
-    const t = 0.2 + Math.random()*0.7;
-    const bx = bezierPoint(teeX, cp1x, cp2x, holeX, t);
-    const by = bezierPoint(teeY, cp1y, cp2y, holeY, t);
-    const offset = (Math.random()>0.5?1:-1) * (fairwayW*0.4 + 5 + Math.random()*25);
+    const t = 0.15 + Math.random()*0.8;
+    if (isSplitHole && t >= gapStartT && t <= gapEndT) continue;
+    const bx = bezierPoint(teeX, cp1x, cp2x, holeX, t), by = bezierPoint(teeY, cp1y, cp2y, holeY, t);
     sandTraps.push({
-      cx: bx + offset, cy: by + (Math.random()-0.5)*15,
-      rx: 20+Math.random()*20, ry: 12+Math.random()*15,
-      angle: Math.random()*Math.PI
+      cx: bx + (Math.random()-0.5)*(fairwayW + 40), cy: by + (Math.random()-0.5)*20,
+      rx: 15+Math.random()*15, ry: 10+Math.random()*10, angle: Math.random()*Math.PI
+    });
+  }
+
+  let rivers = [], lakes = [];
+  const numRivers = Math.floor(difficulty * 2.5);
+  for(let i=0; i<numRivers; i++) {
+     let rt = 0.3 + Math.random() * 0.5;
+     let rw = 15 + Math.random() * 20;
+     let rcy = bezierPoint(teeY, cp1y, cp2y, holeY, rt);
+     rivers.push({ y: rcy, width: rw, phase: Math.random()*Math.PI*2, angle: (Math.random()-0.5)*0.5 });
+  }
+  const numLakes = Math.floor(difficulty * 3);
+  for(let i=0; i<numLakes; i++) {
+    const t = 0.2 + Math.random()*0.6;
+    const bx = bezierPoint(teeX, cp1x, cp2x, holeX, t), by = bezierPoint(teeY, cp1y, cp2y, holeY, t);
+    const offset = (Math.random()>0.5?1:-1) * (fairwayW*0.6 + 10 + Math.random()*30);
+    lakes.push({
+      cx: bx + offset, cy: by + (Math.random()-0.5)*20,
+      rx: 20+Math.random()*25, ry: 15+Math.random()*15, angle: Math.random()*Math.PI
     });
   }
   
-  const greenR = 45 - difficulty*15 + Math.random()*5;
-  
-  return { par, holeLength: logicalDist, scale, difficulty, teeX, teeY, holeX, holeY, cp1x, cp1y, cp2x, cp2y, fairwayW, sandTraps, greenR };
+  const greenR = Math.max(30, 50 - difficulty*15);
+
+  let trees = [];
+  const numTrees = Math.floor(60 + difficulty*60); 
+  for(let i=0;i<numTrees;i++) {
+      let tx, ty, valid = false, attempts = 0;
+      while(!valid && attempts < 15) {
+          attempts++;
+          if (trees.length > 0 && Math.random() < 0.75) { 
+              const sibling = trees[Math.floor(Math.random()*trees.length)];
+              tx = sibling.x + (Math.random()-0.5)*35; ty = sibling.y + (Math.random()-0.5)*35;
+          } else { tx = Math.random()*W; ty = Math.random()*H; }
+          
+          if (Math.hypot(tx - teeX, ty - teeY) < 40 || Math.hypot(tx - holeX, ty - holeY) < greenR + 20) continue;
+          let minD = Infinity;
+          for(let t=0; t<=1; t+=0.05) {
+              const bx = bezierPoint(teeX, cp1x, cp2x, holeX, t), by = bezierPoint(teeY, cp1y, cp2y, holeY, t);
+              minD = Math.min(minD, Math.hypot(tx-bx, ty-by));
+          }
+          if (Math.random() < 0.03 || minD > fairwayW/2 + 5) valid = true;
+      }
+      if(valid) trees.push({x: tx, y: ty, r: 8 + Math.random()*12});
+  }
+  trees.sort((a,b) => a.y - b.y);
+
+  return { par, holeLength: logicalDist, scale, difficulty, teeX, teeY, holeX, holeY, cp1x, cp1y, cp2x, cp2y, fairwayW, sandTraps, rivers, lakes, trees, greenR, fNoise, isSplitHole, gapStartT, gapEndT, obFlanks: { left: [], right: [] } };
 }
 
 function bezierPoint(p0,p1,p2,p3,t) { return (1-t)**3*p0 + 3*(1-t)**2*t*p1 + 3*(1-t)*t**2*p2 + t**3*p3; }
 function bezierTangent(p0,p1,p2,p3,t) { return 3*(1-t)**2*(p1-p0) + 6*(1-t)*t*(p2-p1) + 3*t**2*(p3-p2); }
 
-function tracePath(ctx, hd, expand) {
-  const ptsLeft = [], ptsRight = [];
-  for(let t=0; t<=1.01; t+=0.02) {
-      const tt = Math.min(t, 1);
-      const bx = bezierPoint(hd.teeX, hd.cp1x, hd.cp2x, hd.holeX, tt);
-      const by = bezierPoint(hd.teeY, hd.cp1y, hd.cp2y, hd.holeY, tt);
-      const dx = bezierTangent(hd.teeX, hd.cp1x, hd.cp2x, hd.holeX, tt);
-      const dy = bezierTangent(hd.teeY, hd.cp1y, hd.cp2y, hd.holeY, tt);
-      const len = Math.sqrt(dx*dx+dy*dy) || 1;
-      const nx = -dy/len, ny = dx/len;
+function createTerrainPaths(hd) {
+    const paths = { fairway: new Path2D(), semirough: new Path2D(), rough: new Path2D(), ob: new Path2D() };
+    let segments = [];
+    if (hd.isSplitHole) { segments.push([0, hd.gapStartT]); segments.push([hd.gapEndT, 1.0]); }
+    else { segments.push([0, 1.0]); }
 
-      const noise = Math.sin(tt * Math.PI * 6) * 0.2 + Math.sin(tt * Math.PI * 13) * 0.1;
-      const widthProgress = 0.6 + tt * 0.4; 
-      const w = (hd.fairwayW/2) * (1 + noise) * widthProgress + expand;
+    hd.obFlanks = { left: [], right: [] }; 
 
-      ptsLeft.push({x: bx + nx*w, y: by + ny*w});
-      ptsRight.unshift({x: bx - nx*w, y: by - ny*w});
-  }
-  const pts = [...ptsLeft, ...ptsRight];
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  for(let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-  ctx.closePath();
+    for (let seg of segments) {
+        const tStart = seg[0], tEnd = seg[1];
+        const steps = Math.ceil((tEnd - tStart) / 0.02);
+        const pts = { fairway: {l:[], r:[]}, semirough: {l:[], r:[]}, rough: {l:[], r:[]}, ob: {l:[], r:[]} };
+
+        for(let i=0; i<=steps; i++) {
+            const tt = tStart + (i/steps) * (tEnd - tStart);
+            const bx = bezierPoint(hd.teeX, hd.cp1x, hd.cp2x, hd.holeX, tt);
+            const by = bezierPoint(hd.teeY, hd.cp1y, hd.cp2y, hd.holeY, tt);
+            const dx = bezierTangent(hd.teeX, hd.cp1x, hd.cp2x, hd.holeX, tt);
+            const dy = bezierTangent(hd.teeY, hd.cp1y, hd.cp2y, hd.holeY, tt);
+            const len = Math.hypot(dx, dy) || 1;
+            const nx = -dy/len, ny = dx/len;
+
+            const env = Math.sin((i/steps) * Math.PI);
+            const noiseL = (Math.sin(tt * Math.PI * 5 + hd.fNoise.l1) * 0.25 + Math.sin(tt * Math.PI * 9 + hd.fNoise.l2) * 0.15) * env;
+            const noiseR = (Math.sin(tt * Math.PI * 4 + hd.fNoise.r1) * 0.25 + Math.sin(tt * Math.PI * 11 + hd.fNoise.r2) * 0.15) * env;
+            const widthProgress = 0.6 + tt * 0.4;
+
+            const fwL = (hd.fairwayW/2) * (1 + noiseL) * widthProgress;
+            const fwR = (hd.fairwayW/2) * (1 + noiseR) * widthProgress;
+
+            const srNoiseL = (Math.sin(tt * Math.PI * 6 + hd.fNoise.srL1) * 0.2 + Math.sin(tt * Math.PI * 13 + hd.fNoise.srL2) * 0.1) * env;
+            const srNoiseR = (Math.sin(tt * Math.PI * 5 + hd.fNoise.srR1) * 0.2 + Math.sin(tt * Math.PI * 15 + hd.fNoise.srR2) * 0.1) * env;
+            const srW_L = 10 + Math.max(5, (hd.fairwayW * 0.3) * (1 + srNoiseL));
+            const srW_R = 10 + Math.max(5, (hd.fairwayW * 0.3) * (1 + srNoiseR));
+
+            const obNoiseL = (Math.sin(tt * Math.PI * 3 + hd.fNoise.l1) * 40 * env) + 70;
+            const obNoiseR = (Math.sin(tt * Math.PI * 2 + hd.fNoise.r2) * 40 * env) + 70;
+
+            pts.fairway.l.push({x: bx + nx*fwL, y: by + ny*fwL});
+            pts.fairway.r.push({x: bx - nx*fwR, y: by - ny*fwR});
+
+            pts.semirough.l.push({x: bx + nx*(fwL + srW_L), y: by + ny*(fwL + srW_L)});
+            pts.semirough.r.push({x: bx - nx*(fwR + srW_R), y: by - ny*(fwR + srW_R)});
+
+            pts.rough.l.push({x: bx + nx*(fwL + srW_L + 16), y: by + ny*(fwL + srW_L + 16)});
+            pts.rough.r.push({x: bx - nx*(fwR + srW_R + 16), y: by - ny*(fwR + srW_R + 16)});
+
+            pts.ob.l.push({x: bx + nx*(fwL + srW_L + obNoiseL), y: by + ny*(fwL + srW_L + obNoiseL)});
+            pts.ob.r.push({x: bx - nx*(fwR + srW_R + obNoiseR), y: by - ny*(fwR + srW_R + obNoiseR)});
+
+            // Guardar trazo exterior para línea punteada O.B.
+            if (segments.length === 1 || (segments.length === 2 && seg === segments[0])) {
+                 hd.obFlanks.left.push({x: bx + nx*(fwL + srW_L + obNoiseL), y: by + ny*(fwL + srW_L + obNoiseL)});
+                 hd.obFlanks.right.push({x: bx - nx*(fwR + srW_R + obNoiseR), y: by - ny*(fwR + srW_R + obNoiseR)});
+            } else if (seg === segments[1]) {
+                 hd.obFlanks.left.push({x: bx + nx*(fwL + srW_L + obNoiseL), y: by + ny*(fwL + srW_L + obNoiseL)});
+                 hd.obFlanks.right.push({x: bx - nx*(fwR + srW_R + obNoiseR), y: by - ny*(fwR + srW_R + obNoiseR)});
+            }
+        }
+
+        ['fairway', 'semirough', 'rough', 'ob'].forEach(type => {
+            const poly = pts[type];
+            paths[type].moveTo(poly.r[0].x, poly.r[0].y);
+            for(let i=1; i<poly.r.length; i++) paths[type].lineTo(poly.r[i].x, poly.r[i].y);
+
+            const bxEnd = bezierPoint(hd.teeX, hd.cp1x, hd.cp2x, hd.holeX, tEnd);
+            const byEnd = bezierPoint(hd.teeY, hd.cp1y, hd.cp2y, hd.holeY, tEnd);
+            const dxEnd = bezierTangent(hd.teeX, hd.cp1x, hd.cp2x, hd.holeX, tEnd);
+            const dyEnd = bezierTangent(hd.teeY, hd.cp1y, hd.cp2y, hd.holeY, tEnd);
+            const angEnd = Math.atan2(dyEnd, dxEnd);
+            const wEnd = Math.hypot(poly.l[poly.l.length-1].x - bxEnd, poly.l[poly.l.length-1].y - byEnd);
+            paths[type].arc(bxEnd, byEnd, wEnd, angEnd + Math.PI/2, angEnd - Math.PI/2, true);
+
+            for(let i=poly.l.length-1; i>=0; i--) paths[type].lineTo(poly.l[i].x, poly.l[i].y);
+
+            const bxStart = bezierPoint(hd.teeX, hd.cp1x, hd.cp2x, hd.holeX, tStart);
+            const byStart = bezierPoint(hd.teeY, hd.cp1y, hd.cp2y, hd.holeY, tStart);
+            const dxStart = bezierTangent(hd.teeX, hd.cp1x, hd.cp2x, hd.holeX, tStart);
+            const dyStart = bezierTangent(hd.teeY, hd.cp1y, hd.cp2y, hd.holeY, tStart);
+            const angStart = Math.atan2(dyStart, dxStart);
+            const wStart = Math.hypot(poly.l[0].x - bxStart, poly.l[0].y - byStart);
+            paths[type].arc(bxStart, byStart, wStart, angStart - Math.PI/2, angStart + Math.PI/2, true);
+            paths[type].closePath();
+        });
+    }
+    return paths;
 }
 
 function getTerrain(x, y) {
   try {
     const hd = state.holeData;
     if(!hd) return 'fairway';
-    const dxG = x - hd.holeX, dyG = y - hd.holeY;
-    if (Math.sqrt(dxG*dxG + dyG*dyG) <= hd.greenR + 6) return 'green';
     
-    let inSand = false;
-    hd.sandTraps.forEach(s => {
+    for (let r of hd.rivers) {
+       let wave = Math.sin(x/50 + r.phase) * 10, center_y = r.y + (x - cCourse.width/2) * r.angle + wave;
+       if (Math.abs(y - center_y) <= r.width/2) return 'agua';
+    }
+    for (let l of hd.lakes) {
+      const nx = x - l.cx, ny = y - l.cy;
+      const rdx = nx * Math.cos(-l.angle) - ny * Math.sin(-l.angle), rdy = nx * Math.sin(-l.angle) + ny * Math.cos(-l.angle);
+      if ((rdx*rdx)/(l.rx*l.rx) + (rdy*rdy)/(l.ry*l.ry) <= 1) return 'agua';
+    }
+    if (Math.hypot(x - hd.holeX, y - hd.holeY) <= hd.greenR + 6) return 'green';
+    for(let s of hd.sandTraps) {
       const nx = x - s.cx, ny = y - s.cy;
-      const rdx = nx * Math.cos(-s.angle) - ny * Math.sin(-s.angle);
-      const rdy = nx * Math.sin(-s.angle) + ny * Math.cos(-s.angle);
-      if ((rdx*rdx)/(s.rx*s.rx) + (rdy*rdy)/(s.ry*s.ry) <= 1) inSand = true;
-    });
-    if (inSand) return 'sand';
+      const rdx = nx * Math.cos(-s.angle) - ny * Math.sin(-s.angle), rdy = nx * Math.sin(-s.angle) + ny * Math.cos(-s.angle);
+      if ((rdx*rdx)/(s.rx*s.rx) + (rdy*rdy)/(s.ry*s.ry) <= 1) return 'bunker';
+    }
     
-    tracePath(ctxC, hd, 0);
-    if (ctxC.isPointInPath(x, y)) return 'fairway';
-    
-    return 'rough';
-  } catch(e) {
-    return 'fairway'; // Safe fallback
-  }
+    if (state.paths.fairway && ctxC.isPointInPath(state.paths.fairway, x, y)) return 'fairway';
+    if (state.paths.semirough && ctxC.isPointInPath(state.paths.semirough, x, y)) return 'semirough';
+    if (state.paths.rough && ctxC.isPointInPath(state.paths.rough, x, y)) return 'rough';
+    if (state.paths.ob && ctxC.isPointInPath(state.paths.ob, x, y)) return 'deeprough';
+    return 'ob';
+  } catch(e) { return 'fairway'; }
 }
 
-let cachedPattern = null;
 function getFairwayPattern(ctx) {
-  if(cachedPattern) return cachedPattern;
+  if(state.cachedPattern) return state.cachedPattern;
   try {
-    const pCanvas = document.createElement('canvas');
-    pCanvas.width = 40; pCanvas.height = 40;
+    const pCanvas = document.createElement('canvas'); pCanvas.width = 40; pCanvas.height = 40;
     const pCtx = pCanvas.getContext('2d');
-    pCtx.fillStyle = '#315424'; pCtx.fillRect(0,0,40,40);
-    pCtx.fillStyle = '#2b4d1f';
+    pCtx.fillStyle = '#315424'; pCtx.fillRect(0,0,40,40); pCtx.fillStyle = '#2b4d1f';
     pCtx.beginPath(); pCtx.moveTo(0, 40); pCtx.lineTo(40, 0); pCtx.lineTo(40, 20); pCtx.lineTo(20, 40); pCtx.fill();
     pCtx.beginPath(); pCtx.moveTo(0, 20); pCtx.lineTo(20, 0); pCtx.lineTo(0, 0); pCtx.fill();
-    cachedPattern = ctx.createPattern(pCanvas, 'repeat');
-    return cachedPattern;
-  } catch(e) {
-    return null;
-  }
+    state.cachedPattern = ctx.createPattern(pCanvas, 'repeat');
+    return state.cachedPattern;
+  } catch(e) { return null; }
 }
 
 function drawCourse() {
   const W = cCourse.width, H = cCourse.height, hd = state.holeData;
   if(!hd) return;
-  ctxC.clearRect(0,0,W,H);
   
   ctxC.fillStyle = '#111a0e'; ctxC.fillRect(0,0,W,H);
-  ctxC.fillStyle = '#162312';
-  for(let i=0; i<800; i++) ctxC.fillRect(Math.random()*W, Math.random()*H, 3, 2);
-
-  // Rough area
-  tracePath(ctxC, hd, 16);
-  ctxC.fillStyle = '#1e3218'; 
-  ctxC.fill();
+  state.paths = createTerrainPaths(hd);
   
-  // Fairway
-  tracePath(ctxC, hd, 0);
-  ctxC.fillStyle = getFairwayPattern(ctxC) || '#2b4d1f'; 
-  ctxC.fill();
+  // Limites Deep Rough
+  ctxC.fillStyle = '#111a0e'; ctxC.fill(state.paths.ob);
 
-  // Connector Tee
-  ctxC.strokeStyle = '#2b4d1f'; ctxC.lineWidth = hd.fairwayW * 0.4;
-  ctxC.lineCap = 'square'; ctxC.beginPath();
-  ctxC.moveTo(hd.teeX, hd.teeY); ctxC.lineTo(hd.teeX, hd.teeY - 30); ctxC.stroke();
+  // Línea O.B (Solo en los flancos, sin cierres)
+  ctxC.setLineDash([8, 8]); ctxC.strokeStyle = 'rgba(255, 255, 255, 0.4)'; ctxC.lineWidth = 2;
+  if(hd.obFlanks.left.length > 0) {
+      ctxC.beginPath(); ctxC.moveTo(hd.obFlanks.left[0].x, hd.obFlanks.left[0].y);
+      for(let i=1; i<hd.obFlanks.left.length; i++) ctxC.lineTo(hd.obFlanks.left[i].x, hd.obFlanks.left[i].y);
+      ctxC.stroke();
+  }
+  if(hd.obFlanks.right.length > 0) {
+      ctxC.beginPath(); ctxC.moveTo(hd.obFlanks.right[0].x, hd.obFlanks.right[0].y);
+      for(let i=1; i<hd.obFlanks.right.length; i++) ctxC.lineTo(hd.obFlanks.right[i].x, hd.obFlanks.right[i].y);
+      ctxC.stroke();
+  }
+  ctxC.setLineDash([]);
+
+  // Textura Rough global que respeta el OB 
+  ctxC.fillStyle = '#162312';
+  for(let i=0; i<1500; i++) {
+     let x = Math.random()*W, y=Math.random()*H;
+     const terr = getTerrain(x,y);
+     if(terr === 'rough' || terr === 'semirough' || terr === 'deeprough') ctxC.fillRect(x, y, 3, 2);
+  }
+
+  if(state.paths.rough) { ctxC.fillStyle = '#1e3218'; ctxC.fill(state.paths.rough); }
+  if(state.paths.semirough) { ctxC.fillStyle = '#223d1b'; ctxC.fill(state.paths.semirough); }
+  if(state.paths.fairway) { ctxC.fillStyle = getFairwayPattern(ctxC) || '#2b4d1f'; ctxC.fill(state.paths.fairway); }
+
+  ctxC.fillStyle = '#1c3d5a';
+  hd.rivers.forEach(r => {
+       ctxC.beginPath();
+       for(let x=0; x<=W; x+=20) {
+           let wave = Math.sin(x/50 + r.phase) * 10, y = r.y + (x - W/2) * r.angle + wave;
+           if(x===0) ctxC.moveTo(x, y - r.width/2); else ctxC.lineTo(x, y - r.width/2);
+       }
+       for(let x=W; x>=0; x-=20) {
+           let wave = Math.sin(x/50 + r.phase) * 10, y = r.y + (x - W/2) * r.angle + wave;
+           ctxC.lineTo(x, y + r.width/2);
+       }
+       ctxC.closePath(); ctxC.fill();
+       ctxC.strokeStyle = '#2b5f8c'; ctxC.lineWidth = 1; ctxC.beginPath();
+       for(let x=20; x<W; x+=40) {
+           let wave = Math.sin(x/50 + r.phase) * 10, y = r.y + (x - W/2) * r.angle + wave;
+           ctxC.moveTo(x, y); ctxC.lineTo(x+10, y);
+       }
+       ctxC.stroke();
+  });
+
+  hd.lakes.forEach(l => {
+    ctxC.save(); ctxC.translate(l.cx, l.cy); ctxC.rotate(l.angle);
+    ctxC.fillStyle = '#1c3d5a'; ctxC.beginPath(); ctxC.ellipse(0, 0, l.rx, l.ry, 0, 0, Math.PI*2); ctxC.fill();
+    ctxC.strokeStyle = '#2b5f8c'; ctxC.lineWidth = 1; 
+    ctxC.beginPath(); ctxC.moveTo(-l.rx*0.5, 0); ctxC.lineTo(l.rx*0.5, 0); ctxC.stroke();
+    ctxC.beginPath(); ctxC.moveTo(-l.rx*0.3, l.ry*0.4); ctxC.lineTo(l.rx*0.3, l.ry*0.4); ctxC.stroke();
+    ctxC.restore();
+  });
 
   hd.sandTraps.forEach(s => {
     ctxC.save(); ctxC.translate(s.cx, s.cy); ctxC.rotate(s.angle);
@@ -413,47 +589,37 @@ function drawCourse() {
     ctxC.fillStyle = '#c2a86b'; ctxC.beginPath(); ctxC.ellipse(0, 0, s.rx, s.ry, 0, 0, Math.PI*2); ctxC.fill();
     ctxC.fillStyle = '#a68f56';
     for(let i=0;i<20;i++){
-      const angle=Math.random()*Math.PI*2, r=Math.random();
-      ctxC.fillRect(Math.cos(angle)*s.rx*r, Math.sin(angle)*s.ry*r, 3,1.5);
+      const angle=Math.random()*Math.PI*2, r=Math.random(); ctxC.fillRect(Math.cos(angle)*s.rx*r, Math.sin(angle)*s.ry*r, 3,1.5);
     }
     ctxC.restore();
   });
   
   const gx=hd.holeX, gy=hd.holeY, gr=hd.greenR;
-  ctxC.fillStyle = '#224a1e';
-  ctxC.beginPath(); ctxC.arc(gx, gy, gr + 6, 0, Math.PI*2);
-  ctxC.arc(gx - gr*0.4, gy + gr*0.4, gr*0.9 + 6, 0, Math.PI*2);
-  ctxC.arc(gx + gr*0.3, gy - gr*0.3, gr*0.8 + 6, 0, Math.PI*2); ctxC.fill();
-
-  ctxC.fillStyle = '#32702c';
-  ctxC.beginPath(); ctxC.arc(gx, gy, gr, 0, Math.PI*2);
-  ctxC.arc(gx - gr*0.4, gy + gr*0.4, gr*0.9, 0, Math.PI*2);
-  ctxC.arc(gx + gr*0.3, gy - gr*0.3, gr*0.8, 0, Math.PI*2); ctxC.fill();
+  ctxC.fillStyle = '#224a1e'; ctxC.beginPath(); ctxC.arc(gx, gy, gr + 6, 0, Math.PI*2); ctxC.fill();
+  ctxC.fillStyle = '#32702c'; ctxC.beginPath(); ctxC.arc(gx, gy, gr, 0, Math.PI*2); ctxC.fill();
   
-  ctxC.fillStyle = '#050a05'; ctxC.beginPath();ctxC.arc(gx,gy,7,0,Math.PI*2);ctxC.fill();
-  ctxC.strokeStyle = '#e0e0e0'; ctxC.lineWidth = 1.5;
-  ctxC.beginPath();ctxC.moveTo(gx,gy);ctxC.lineTo(gx,gy-32);ctxC.stroke();
-  ctxC.fillStyle = '#e84832'; ctxC.beginPath();ctxC.moveTo(gx,gy-32);ctxC.lineTo(gx+18,gy-26);ctxC.lineTo(gx,gy-20);ctxC.closePath();ctxC.fill();
+  ctxC.fillStyle = '#000'; ctxC.beginPath();ctxC.arc(gx,gy,7,0,Math.PI*2);ctxC.fill();
+  ctxC.strokeStyle = '#e0e0e0'; ctxC.lineWidth = 1.5; ctxC.beginPath();ctxC.moveTo(gx,gy);ctxC.lineTo(gx,gy-32);ctxC.stroke();
+  ctxC.fillStyle = '#e84832'; ctxC.beginPath();ctxC.moveTo(gx,gy-32);ctxC.lineTo(gx+18,gy-26);ctxC.lineTo(gx,gy-20);ctxC.fill();
   
   ctxC.fillStyle = '#173614'; ctxC.beginPath();ctxC.ellipse(hd.teeX, hd.teeY, 26, 14, 0, 0, Math.PI*2);ctxC.fill();
-  ctxC.fillStyle = '#23521e'; ctxC.beginPath();ctxC.ellipse(hd.teeX, hd.teeY, 20, 10, 0, 0, Math.PI*2);ctxC.fill();
   ctxC.fillStyle = '#ffffff'; ctxC.beginPath();ctxC.arc(hd.teeX - 12, hd.teeY, 2.5, 0, Math.PI*2);ctxC.fill();
   ctxC.beginPath();ctxC.arc(hd.teeX + 12, hd.teeY, 2.5, 0, Math.PI*2);ctxC.fill();
-  ctxC.fillStyle = 'rgba(168,216,120,0.6)'; ctxC.font = '9px DM Mono,monospace'; ctxC.textAlign = 'center';
-  ctxC.fillText('TEE', hd.teeX, hd.teeY+22);
+  
+  hd.trees.forEach(t => {
+     ctxC.fillStyle = '#3a2a18'; ctxC.fillRect(t.x-2, t.y, 4, 12);
+     ctxC.fillStyle = 'rgba(0,0,0,0.3)'; ctxC.beginPath(); ctxC.ellipse(t.x, t.y+10, t.r*0.8, t.r*0.4, 0, 0, Math.PI*2); ctxC.fill();
+     ctxC.fillStyle = '#1e3d22'; ctxC.beginPath(); ctxC.arc(t.x, t.y, t.r, 0, Math.PI*2); ctxC.fill();
+     ctxC.fillStyle = '#27522c'; ctxC.beginPath(); ctxC.arc(t.x-t.r*0.2, t.y-t.r*0.2, t.r*0.7, 0, Math.PI*2); ctxC.fill();
+  });
 }
 
 function drawBall() {
   const W=cBall.width, H=cBall.height;
   ctxB.clearRect(0,0,W,H);
   const b = state.ball; const r = b.airR || 5;
-  
-  ctxB.fillStyle = 'rgba(0,0,0,0.4)';
-  ctxB.beginPath(); ctxB.ellipse(b.x, b.y+(r*0.5), r*0.8, r*0.25, 0, 0, Math.PI*2); ctxB.fill();
-  
-  const grad = ctxB.createRadialGradient(b.x-r*0.3, b.y-r*0.3, r*0.1, b.x, b.y, r);
-  grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.5, '#e0e0e0'); grad.addColorStop(1, '#999999');
-  ctxB.fillStyle = grad; ctxB.beginPath(); ctxB.arc(b.x, b.y, r, 0, Math.PI*2); ctxB.fill();
+  ctxB.fillStyle = 'rgba(0,0,0,0.4)'; ctxB.beginPath(); ctxB.ellipse(b.x, b.y+(r*0.5), r*0.8, r*0.25, 0, 0, Math.PI*2); ctxB.fill();
+  ctxB.fillStyle = '#fff'; ctxB.beginPath(); ctxB.arc(b.x, b.y, r, 0, Math.PI*2); ctxB.fill();
 }
 
 function drawUI() {
@@ -463,305 +629,201 @@ function drawUI() {
   if(state.phase === 'card_select' && state.target) {
     const dx = state.target.x - state.ball.x, dy = state.target.y - state.ball.y;
     const ang = Math.atan2(dy, dx);
+    const activeBall = state.hand.find(c => c.uid === state.selectedBall);
+    const hasScope = activeBall && activeBall.effect === 'guide';
     
-    ctxU.strokeStyle = 'rgba(255,255,255,0.2)'; ctxU.lineWidth = 1;
-    ctxU.setLineDash([4, 4]); ctxU.beginPath();
-    ctxU.moveTo(state.ball.x, state.ball.y);
-    ctxU.lineTo(state.ball.x + Math.cos(ang)*W*2, state.ball.y + Math.sin(ang)*H*2);
-    ctxU.stroke(); ctxU.setLineDash([]);
+    let isWarning = (state.currentTerrain === 'rough' || state.currentTerrain === 'semirough' || state.currentTerrain === 'deeprough' || state.currentTerrain === 'bunker');
+    ctxU.strokeStyle = isWarning ? 'rgba(232,72,50,0.6)' : 'rgba(255,255,255,0.4)'; 
+    ctxU.lineWidth = 2;
     
-    ctxU.fillStyle = 'rgba(255,255,255,0.7)';
-    ctxU.beginPath(); ctxU.arc(state.target.x, state.target.y, 4, 0, Math.PI*2); ctxU.fill();
+    ctxU.beginPath(); ctxU.moveTo(state.ball.x, state.ball.y);
     
-    if (state.selectedClub) {
-      const club = state.hand.find(c => c.uid === state.selectedClub);
-      if (club) {
+    if (hasScope) {
+      ctxU.setLineDash([4, 4]); ctxU.lineTo(state.ball.x + Math.cos(ang)*W*2, state.ball.y + Math.sin(ang)*H*2);
+      ctxU.stroke(); ctxU.setLineDash([]);
+      ctxU.fillStyle = 'rgba(255,255,255,0.8)'; ctxU.beginPath(); ctxU.arc(state.target.x, state.target.y, 4, 0, Math.PI*2); ctxU.fill();
+      
+      if (state.selectedClub) {
+        const club = state.hand.find(c => c.uid === state.selectedClub);
         let clubDist = club.dist;
-        if(state.selectedBall) {
-            const bc = state.hand.find(b => b.uid === state.selectedBall);
-            if(bc && bc.effect === 'power') clubDist = Math.round(clubDist*1.2);
-        }
-        const pxDist = clubDist * state.holeData.scale;
-        const reachX = state.ball.x + Math.cos(ang)*pxDist;
-        const reachY = state.ball.y + Math.sin(ang)*pxDist;
+        if(activeBall && activeBall.effect === 'power') clubDist = Math.round(clubDist*1.2);
         
-        ctxU.fillStyle = 'rgba(168,216,120,0.8)';
+        let lFactor = Math.max(0, Math.min(1, (club.dist - 80) / 160));
+        let pDist = 0;
+        if (state.currentTerrain === 'rough') pDist = 0.08 + (0.17 * lFactor);
+        else if (state.currentTerrain === 'semirough') pDist = 0.03 + (0.07 * lFactor);
+        else if (state.currentTerrain === 'deeprough') pDist = 0.12 + (0.25 * lFactor);
+        else if (state.currentTerrain === 'bunker') pDist = 0.20 + (0.30 * lFactor);
+        clubDist = Math.round(clubDist * (1 - pDist));
+
+        const pxDist = clubDist * state.holeData.scale;
+        const reachX = state.ball.x + Math.cos(ang)*pxDist, reachY = state.ball.y + Math.sin(ang)*pxDist;
+        ctxU.fillStyle = isWarning ? 'rgba(232,72,50,0.8)' : 'rgba(168,216,120,0.8)';
         ctxU.beginPath(); ctxU.arc(reachX, reachY, 5, 0, Math.PI*2); ctxU.fill();
-        ctxU.fillStyle = '#111'; ctxU.font = '8px DM Mono'; ctxU.textAlign='center';
-        ctxU.fillText('MAX', reachX, reachY+3);
       }
+    } else {
+      ctxU.lineTo(state.ball.x + Math.cos(ang)*40, state.ball.y + Math.sin(ang)*40); ctxU.stroke();
     }
   }
   
   if(state.phase === 'flight' && state.ballAnim && state.ballAnim.trace.length > 1) {
     const tr = state.ballAnim.trace;
-    ctxU.strokeStyle = 'rgba(255,255,255,0.4)'; ctxU.lineWidth = 1.5;
-    ctxU.setLineDash([3,5]); ctxU.beginPath();
-    ctxU.moveTo(tr[0].x, tr[0].y);
+    ctxU.strokeStyle = 'rgba(255,255,255,0.4)'; ctxU.lineWidth = 1.5; ctxU.setLineDash([3,5]);
+    ctxU.beginPath(); ctxU.moveTo(tr[0].x, tr[0].y);
     for(let i=1;i<tr.length;i++) ctxU.lineTo(tr[i].x, tr[i].y);
     ctxU.stroke(); ctxU.setLineDash([]);
   }
 }
 
-function resetMetersUI() {
-  $('power-fill').style.width = '0%';
-  $('aim-cursor').style.left = '50%';
-}
-
+function resetMetersUI() { $('power-fill').style.width = '0%'; $('aim-cursor').style.left = '50%'; }
 function updateShootBtnUI() {
   const btn = $('shoot-btn');
   if (state.phase === 'card_select') {
-      btn.disabled = !state.selectedClub;
-      btn.textContent = state.selectedClub ? 'MANTÉN (FUERZA)' : 'GOLPEAR';
-  } else if (state.phase === 'power') {
-      btn.disabled = false;
-      btn.textContent = 'SUELTA (FIJAR)';
-  } else if (state.phase === 'aim') {
-      btn.disabled = false;
-      btn.textContent = 'PULSA (DIRECCIÓN)';
-  } else {
-      btn.disabled = true;
-      btn.textContent = '...';
-  }
+      btn.disabled = !state.selectedClub; btn.textContent = state.selectedClub ? 'MANTENER' : 'GOLPEAR';
+  } else if (state.phase === 'power') { btn.disabled = false; btn.textContent = 'SOLTAR'; }
+  else if (state.phase === 'aim') { btn.disabled = false; btn.textContent = 'PULSAR'; }
+  else { btn.disabled = true; btn.textContent = '...'; }
 }
 
 // ─── WIND & CARDS ────────────────────────────────────────────────────────────
 function generateWind() {
-  const baseSpeed = 4 + state.holeData.difficulty * 12;
-  state.wind.speed = Math.random() * baseSpeed;
+  state.wind.speed = Math.random() * (4 + state.holeData.difficulty * 12);
   state.wind.dir = Math.random()*Math.PI*2;
   $('wind-text').textContent = state.wind.speed.toFixed(1)+' m/s';
+  $('wind-arrow').style.transform = `rotate(${state.wind.dir}rad)`;
   const flagEl = $('flag-shape'), animAmt = Math.min(state.wind.speed/15, 1);
-  const hComp = Math.cos(state.wind.dir);
-  flagEl.setAttribute('points', `20,6 ${34+hComp*animAmt*8},${12+animAmt*2} 20,18`);
+  flagEl.setAttribute('points', `20,6 ${34+Math.cos(state.wind.dir)*animAmt*8},${12+animAmt*2} 20,18`);
 }
 
-function dealCards() {
-  state.hand = state.hand.filter(c => c.uid !== state.selectedClub && c.uid !== state.selectedBall);
-  state.selectedClub = null;
-  state.selectedBall = null;
-
-  const clubsCount = state.hand.filter(c => c.type === 'club').length;
-  if (clubsCount === 0 || state.hand.length === 0) {
-    let safety = 0;
-    while(state.hand.length < 5 && safety < 50) {
-        safety++;
-        const curClubs = state.hand.filter(c => c.type === 'club').length;
-        
-        // Uso estricto del mazo activo, con red de seguridad
-        let candidates = state.activeDeck && state.activeDeck.length > 0 ? state.activeDeck : INITIAL_COLLECTION;
-        
-        if(curClubs < 2) {
-           const clubCands = candidates.filter(c=>c.type==='club');
-           if(clubCands.length > 0) candidates = clubCands;
-        }
-        
-        const card = candidates[Math.floor(Math.random()*candidates.length)];
-        if(card) state.hand.push(cloneCard(card));
-    }
+function initDeck() {
+  state.drawPile = []; state.discardPile = []; state.hand = [];
+  for(const [baseId, count] of Object.entries(state.deckConfig)) {
+      const template = CARDS_POOL.find(c => c.baseId === baseId);
+      for(let i=0; i<count; i++) state.drawPile.push(cloneCard(template));
   }
+  shuffle(state.drawPile);
+}
 
+function drawCardsToHand() {
   const hasPutt = state.hand.some(c => c.isPutt);
   if (state.distToHole <= 40 && !hasPutt) {
-    const clubIndex = state.hand.findIndex(c => c.type === 'club');
-    if(clubIndex !== -1) state.hand[clubIndex] = cloneCard(PUTTER_CARD);
-    else state.hand.push(cloneCard(PUTTER_CARD));
-  } else if (state.distToHole > 40 && hasPutt) {
-    const pIndex = state.hand.findIndex(c => c.isPutt);
-    if(pIndex !== -1) {
-      let clubs = state.activeDeck && state.activeDeck.length > 0 ? state.activeDeck.filter(c=>c.type==='club') : [];
-      if (clubs.length === 0) clubs = INITIAL_COLLECTION.filter(c=>c.type==='club'); 
-      const newClub = clubs[Math.floor(Math.random()*clubs.length)];
-      if(newClub) state.hand[pIndex] = cloneCard(newClub);
-    }
+      const clubIndex = state.hand.findIndex(c => c.type === 'club');
+      if(clubIndex !== -1) { state.discardPile.push(state.hand[clubIndex]); state.hand[clubIndex] = cloneCard(PUTTER_CARD); }
+      else state.hand.push(cloneCard(PUTTER_CARD));
+  } else if (state.distToHole > 40 && hasPutt) state.hand = state.hand.filter(c => !c.isPutt);
+
+  while(state.hand.length < 5) {
+      if (state.drawPile.length === 0) {
+          if (state.discardPile.length === 0) break;
+          state.drawPile = shuffle([...state.discardPile]); state.discardPile = [];
+      }
+      state.hand.push(state.drawPile.pop());
   }
-  renderCards();
+  $('deck-count').textContent = state.drawPile.length; renderCards();
 }
+
+function discardPlayedCards() {
+  const played = state.hand.filter(c => c.uid === state.selectedClub || c.uid === state.selectedBall);
+  state.hand = state.hand.filter(c => c.uid !== state.selectedClub && c.uid !== state.selectedBall);
+  played.forEach(c => { if(!c.isPutt) state.discardPile.push(c); });
+  state.selectedClub = null; state.selectedBall = null;
+}
+
+let pendingBallCard = null;
 
 function renderCards() {
   const row = $('cards-row'); row.innerHTML = '';
   state.hand.forEach((card) => {
     const div = document.createElement('div');
-    div.className = 'card' + (card.type==='ball'?' ball-card':'');
-    const isClub = card.type==='club';
-    const isSel = isClub ? state.selectedClub === card.uid : state.selectedBall === card.uid;
+    
+    let disabled = false;
+    if(state.currentTerrain === 'green' && card.type === 'ball') disabled = true;
+    if(state.itemLocked && card.type === 'ball' && state.selectedBall !== card.uid) disabled = true;
+
+    div.className = 'card' + (card.type==='ball'?' ball-card':'') + (disabled?' disabled':'');
+    const isSel = (card.type==='club' && state.selectedClub===card.uid) || (card.type==='ball' && state.selectedBall===card.uid);
     if(isSel) div.classList.add('selected');
-    div.innerHTML = `<span class="card-type">${isClub?'Palo':'Bola'}</span><div class="card-icon">${card.icon}</div><div class="card-name">${card.name}</div>${isClub ? `<div class="card-dist ${card.isPutt?'':''}">~${card.dist}m</div>` : `<div class="card-dist gold">${card.icon}</div>`}<div class="card-sub">${isClub ? '' : card.desc}</div>`;
-    div.addEventListener('click',()=>selectCard(card)); row.appendChild(div);
-  });
-}
+    if(disabled) { div.style.opacity = '0.3'; div.style.pointerEvents = 'none'; }
 
-function selectCard(card) {
-  if(state.phase!=='card_select') return;
-  if(card.type==='club') {
-    if(card.isPutt && state.distToHole > 40) return;
-    state.selectedClub = state.selectedClub === card.uid ? null : card.uid;
-  } else {
-    state.selectedBall = state.selectedBall === card.uid ? null : card.uid;
-  }
-  renderCards(); updateShootBtnUI(); updateReachDisplay(); drawUI();
-}
-
-function updateReachDisplay() {
-  if(!state.selectedClub) { $('d-reach').textContent = '— m'; return; }
-  const club = state.hand.find(c=>c.uid===state.selectedClub);
-  if(!club) return;
-  let dist = club.dist;
-  if(state.selectedBall) {
-     const bc = state.hand.find(b=>b.uid===state.selectedBall);
-     if(bc && bc.effect === 'power') dist = Math.round(dist*1.2);
-  }
-  $('d-reach').textContent = '~'+dist+' m';
-}
-
-// ─── UI SCREENS (DECK BUILDER & DRAFT & SCORECARD) ───────────────────────────
-function showDeckBuilder() {
-  $('deck-overlay').style.display = 'flex';
-  state.draftingLimits = { expected: 15, current: [] };
-  renderDeckGrid(state.collection, 'deck-grid', state.draftingLimits, 'deck-counter', 'deck-btn', () => {
-    state.activeDeck = [...state.draftingLimits.current]; 
-    $('deck-overlay').style.display = 'none';
-    startHole(0);
-  });
-}
-
-function generateProceduralCards(count) {
-  const adjs = ['Pro','Magic','Heavy','Rusty','Carbon','Aero'];
-  const newCards = [];
-  for(let i=0; i<count; i++){
-    if(Math.random()>0.4){
-      const type = Math.random()>0.5 ? 'Wood' : 'Iron';
-      const dist = 120 + Math.floor(Math.random()*120);
-      newCards.push({name:`${adjs[Math.floor(Math.random()*adjs.length)]} ${type}`, dist, icon:type==='Wood'?'🌲':'⛳', type:'club'});
-    } else {
-      const effect = BASE_BALL_EFFECTS[Math.floor(Math.random()*BASE_BALL_EFFECTS.length)];
-      newCards.push({...effect, name:`${adjs[Math.floor(Math.random()*adjs.length)]} Bola`, type:'ball'});
-    }
-  }
-  return newCards;
-}
-
-function showDraftScreen() {
-  const newCards = generateProceduralCards(5);
-  $('deck-title').textContent = 'Recompensa de Torneo';
-  $('deck-sub').textContent = 'Elige 3 cartas nuevas para añadir permanentemente a tu colección.';
-  $('deck-overlay').style.display = 'flex';
-  state.draftingLimits = { expected: 3, current: [] };
-  
-  renderDeckGrid(newCards, 'deck-grid', state.draftingLimits, 'deck-counter', 'deck-btn', () => {
-    state.collection.push(...state.draftingLimits.current);
-    $('deck-overlay').style.display = 'none';
-    state.hole = 0; state.totalScore = 0; state.scores = []; state.hand = [];
-    showDeckBuilder();
-  });
-}
-
-function renderDeckGrid(sourceArray, gridId, limitsObj, counterId, btnId, callback) {
-  const grid = $(gridId); grid.innerHTML = '';
-  $(counterId).textContent = `0 / ${limitsObj.expected}`;
-  $(btnId).disabled = true;
-  $(btnId).onclick = callback;
-  
-  sourceArray.forEach((card) => {
-    const div = document.createElement('div');
-    div.className = 'card' + (card.type==='ball'?' ball-card':'');
-    const isClub = card.type==='club';
-    div.innerHTML = `<span class="card-type">${isClub?'Palo':'Bola'}</span><div class="card-icon">${card.icon}</div><div class="card-name">${card.name}</div>${isClub ? `<div class="card-dist">~${card.dist}m</div>` : `<div class="card-dist gold">${card.icon}</div>`}<div class="card-sub">${isClub ? '' : card.desc}</div>`;
+    div.innerHTML = `<span class="card-type">${card.type==='club'?'Palo':'Bola'}</span><div class="card-icon">${card.icon}</div><div class="card-name">${card.name}</div>${card.type==='club' ? `<div class="card-dist">~${card.dist}m</div>` : `<div class="card-dist gold">${card.icon}</div>`}`;
     
     div.onclick = () => {
-      const selIdx = limitsObj.current.indexOf(card);
-      if(selIdx > -1) {
-        limitsObj.current.splice(selIdx, 1);
-        div.classList.remove('selected');
-      } else if(limitsObj.current.length < limitsObj.expected) {
-        limitsObj.current.push(card);
-        div.classList.add('selected');
+      if(state.phase!=='card_select' || disabled) return;
+      if(card.type==='club') {
+         state.selectedClub = state.selectedClub === card.uid ? null : card.uid;
+         renderCards(); updateShootBtnUI(); updateReachDisplay(); drawUI();
+      } else {
+         if (state.itemLocked) return;
+         if (state.selectedBall === card.uid) {
+            state.selectedBall = null;
+            renderCards(); updateReachDisplay(); drawUI();
+         } else {
+            pendingBallCard = card;
+            $('cc-title').innerHTML = `${card.name} ${card.icon}`;
+            $('cc-desc').textContent = card.desc;
+            $('card-confirm-overlay').style.display = 'flex';
+         }
       }
-      $(counterId).textContent = `${limitsObj.current.length} / ${limitsObj.expected}`;
-      $(btnId).disabled = limitsObj.current.length !== limitsObj.expected;
+    };
+    row.appendChild(div);
+  });
+}
+
+$('cc-btn-cancel').onclick = () => { $('card-confirm-overlay').style.display = 'none'; pendingBallCard = null; };
+$('cc-btn-accept').onclick = () => {
+    $('card-confirm-overlay').style.display = 'none';
+    if(pendingBallCard) {
+        state.selectedBall = pendingBallCard.uid;
+        state.itemLocked = true;
+        pendingBallCard = null;
+        renderCards(); updateShootBtnUI(); updateReachDisplay(); drawUI();
+    }
+};
+
+// ─── DECK BUILDER UI ─────────────────────────────────────────────────────────
+function showDeckBuilder() {
+  $('deck-overlay').style.display = 'flex'; state.deckConfig = {}; let totalCards = 0;
+  const grid = $('deck-grid'); grid.innerHTML = ''; const btn = $('deck-btn'); btn.disabled = true;
+  CARDS_POOL.forEach((card) => {
+    state.deckConfig[card.baseId] = 0;
+    const div = document.createElement('div'); div.className = 'card' + (card.type==='ball'?' ball-card':'');
+    div.innerHTML = `<div class="card-badge" style="display:none"></div><div class="card-icon">${card.icon}</div><div class="card-name">${card.name}</div>${card.type==='club' ? `<div class="card-dist">~${card.dist}m</div>` : `<div class="card-dist gold">${card.icon}</div>`}`;
+    const badge = div.querySelector('.card-badge');
+    div.onclick = () => {
+      let count = state.deckConfig[card.baseId];
+      if (count === 2) { state.deckConfig[card.baseId] = 0; totalCards -= 2; } else if (totalCards < 16) { state.deckConfig[card.baseId]++; totalCards++; }
+      count = state.deckConfig[card.baseId];
+      if(count > 0) { div.classList.add('selected'); badge.style.display = 'flex'; badge.textContent = `x${count}`; }
+      else { div.classList.remove('selected'); badge.style.display = 'none'; }
+      $('deck-counter').textContent = `${totalCards} / 16`; btn.disabled = totalCards !== 16;
     };
     grid.appendChild(div);
   });
+  btn.onclick = () => { $('deck-overlay').style.display = 'none'; initDeck(); startHole(0); };
 }
 
-function showScorecard(isMidGame) {
-  $('score-title').textContent = isMidGame ? 'Front 9 (Ida)' : 'Resultados Finales';
-  const total = state.scores.reduce((acc, s) => acc + s.diff, 0);
-  const totalStr = total===0?'Even Par':total>0?'+'+total:total;
-  $('score-sub').textContent = `Puntuación actual: ${totalStr}`;
-  
-  let htmlFront = '<div class="score-row" style="color:var(--accent2);border-bottom:none"><span>HOYO</span><span>PAR</span><span>GOLPES</span><span>SCORE</span></div>';
-  let htmlBack = htmlFront;
-  
-  let frontPar=0, frontStrokes=0, backPar=0, backStrokes=0;
-  
-  for(let i=0; i<18; i++) {
-    const s = state.scores[i];
-    if(!s) break;
-    const isBack = i >= 9;
-    if(!isBack) { frontPar+=s.par; frontStrokes+=s.strokes; } else { backPar+=s.par; backStrokes+=s.strokes; }
-    
-    const dStr = s.diff===0?'E':s.diff>0?'+'+s.diff:s.diff;
-    const color = s.diff<0?'var(--accent)':s.diff>0?'var(--danger)':'var(--text-muted)';
-    const rowStr = `<div class="score-row"><span>#${i+1}</span><span>${s.par}</span><span class="score-val">${s.strokes}</span><span class="score-val" style="color:${color}">${dStr}</span></div>`;
-    if(!isBack) htmlFront += rowStr; else htmlBack += rowStr;
-  }
-  
-  htmlFront += `<div class="score-row total"><span>IDA</span><span>${frontPar}</span><span>${frontStrokes}</span><span></span></div>`;
-  if(!isMidGame) htmlBack += `<div class="score-row total"><span>VUELTA</span><span>${backPar}</span><span>${backStrokes}</span><span></span></div>`;
-  
-  $('score-front').innerHTML = htmlFront;
-  $('score-back').innerHTML = isMidGame ? '' : htmlBack;
-  
-  $('score-btn').textContent = isMidGame ? 'Jugar la Vuelta' : 'Recompensas';
-  $('score-overlay').style.display = 'flex';
-  
-  $('score-btn').onclick = () => {
-    $('score-overlay').style.display = 'none';
-    if(isMidGame) startHole(9);
-    else showDraftScreen();
-  };
-}
-
-// ─── SHOT MECHANICS & EVENTS ─────────────────────────────────────────────────
+// ─── SHOT MECHANICS ──────────────────────────────────────────────────────────
 let powerRaf=null, aimRaf=null;
-
-function startPowerMeter() {
-  state.phase = 'power'; state.powerVal = 0; state.powerDir = 1; state.powerHeld = true;
-  lastPowerTime = performance.now();
-  updateShootBtnUI();
-  animatePower(performance.now());
-}
-
-function stopPower() {
-  if(state.phase!=='power') return;
-  state.powerHeld = false;
-  cancelAnimationFrame(powerRaf); 
-  startAimMeter();
-}
-
+function startPowerMeter() { state.phase = 'power'; state.powerVal = 0; state.powerDir = 1; state.powerHeld = true; lastPowerTime = performance.now(); updateShootBtnUI(); animatePower(performance.now()); }
+function stopPower() { if(state.phase!=='power') return; state.powerHeld = false; cancelAnimationFrame(powerRaf); startAimMeter(); }
 function startAimMeter() {
   const club = state.hand.find(c=>c.uid===state.selectedClub);
   if(club && club.isPutt) { state.aimVal = 0.5; executeShot(); return; }
-  state.phase = 'aim'; state.aimVal = 0; state.aimDir = 1; lastAimTime = performance.now();
-  updateShootBtnUI();
-  animateAim(performance.now());
+  state.phase = 'aim'; state.aimVal = 0; state.aimDir = 1; lastAimTime = performance.now(); updateShootBtnUI(); animateAim(performance.now());
 }
-
-function stopAim() {
-  if(state.phase!=='aim') return;
-  cancelAnimationFrame(aimRaf); 
-  executeShot();
-}
+function stopAim() { if(state.phase!=='aim') return; cancelAnimationFrame(aimRaf); executeShot(); }
 
 let lastPowerTime=0;
 function animatePower(ts) {
   const dt = Math.min((ts-lastPowerTime)/1000, 0.05); lastPowerTime=ts;
-  if(state.powerHeld) state.powerVal = Math.min(1, state.powerVal + dt*1.2);
+  if(state.powerHeld) {
+     state.powerVal += state.powerDir * dt * 2.0; 
+     if (state.powerVal >= 1) { state.powerVal = 1; state.powerDir = -1; }
+     if (state.powerVal <= 0) { state.powerVal = 0; state.powerDir = 1; }
+  }
   $('power-fill').style.width = (state.powerVal*100)+'%';
   if(state.phase==='power') powerRaf=requestAnimationFrame(animatePower);
 }
-
 let lastAimTime=0;
 function animateAim(ts){
   const dt=Math.min((ts-lastAimTime)/1000,0.05); lastAimTime=ts;
@@ -771,41 +833,47 @@ function animateAim(ts){
   if(state.phase==='aim') aimRaf=requestAnimationFrame(animateAim);
 }
 
-// EVENTOS GLOBALES DE CONTROL
 const sBtn = $('shoot-btn');
-function onShootBtnPress(e) {
-    if (sBtn.disabled) return;
-    if (state.phase === 'card_select' && state.selectedClub) {
-        e.preventDefault();
-        $('cards-row').style.pointerEvents='none';
-        startPowerMeter();
-    } else if (state.phase === 'aim') {
-        e.preventDefault();
-        stopAim();
-    }
+function onBtnDown(e){
+    if(sBtn.disabled) return; if(e && e.type !== 'keydown') e.preventDefault();
+    if (state.phase === 'card_select' && state.selectedClub) { $('cards-row').style.pointerEvents='none'; startPowerMeter(); }
+    else if (state.phase === 'aim') stopAim();
 }
-function onShootBtnRelease(e) {
-    if (state.phase === 'power') {
-        e.preventDefault();
-        stopPower();
-    }
+function onBtnUp(e){
+    if(e && e.type !== 'keyup') e.preventDefault();
+    if(state.phase === 'power') stopPower();
 }
-sBtn.addEventListener('mousedown', onShootBtnPress);
-sBtn.addEventListener('touchstart', onShootBtnPress, {passive: false});
-window.addEventListener('mouseup', onShootBtnRelease);
-window.addEventListener('touchend', onShootBtnRelease, {passive: false});
-window.addEventListener('keydown', (e) => {
-    if (e.code === 'Space' && !e.repeat && !sBtn.disabled) onShootBtnPress(e);
-});
-window.addEventListener('keyup', (e) => {
-    if (e.code === 'Space') onShootBtnRelease(e);
-});
+sBtn.addEventListener('touchstart', onBtnDown, {passive: false}); sBtn.addEventListener('touchend', onBtnUp, {passive: false});
+sBtn.addEventListener('mousedown', onBtnDown); window.addEventListener('mouseup', onBtnUp);
+window.addEventListener('keydown', (e) => { if(e.code==='Space' && !e.repeat) onBtnDown(e); });
+window.addEventListener('keyup', (e) => { if(e.code==='Space') onBtnUp(e); });
 
 // ─── EXECUTE SHOT ────────────────────────────────────────────────────────────
+function updateReachDisplay() {
+  if(!state.selectedClub) { $('d-reach').innerHTML = '— m'; return; }
+  const club = state.hand.find(c=>c.uid===state.selectedClub); if(!club) return;
+  
+  let dist = club.dist;
+  if(state.selectedBall) {
+     const bc = state.hand.find(b=>b.uid===state.selectedBall);
+     if(bc && bc.effect === 'power') dist = Math.round(dist*1.2);
+  }
+
+  let lFactor = Math.max(0, Math.min(1, (dist - 80) / 160));
+  let pDist = 0;
+  if (state.currentTerrain === 'rough') pDist = 0.08 + (0.17 * lFactor);
+  else if (state.currentTerrain === 'semirough') pDist = 0.03 + (0.07 * lFactor);
+  else if (state.currentTerrain === 'deeprough') pDist = 0.12 + (0.25 * lFactor);
+  else if (state.currentTerrain === 'bunker') pDist = 0.20 + (0.30 * lFactor);
+  
+  let finalReach = Math.round(dist * (1 - pDist));
+  let html = `~${finalReach} m`;
+  if (pDist > 0) html += `<br><span style="color:var(--danger);font-size:9px;">Penalización Lie -${Math.round(pDist*100)}%</span>`;
+  $('d-reach').innerHTML = html;
+}
+
 function executeShot() {
-  state.phase = 'flight'; state.strokes++;
-  $('h-strokes').textContent = state.strokes; 
-  updateShootBtnUI();
+  state.phase = 'flight'; state.strokes++; $('h-strokes').textContent = state.strokes; updateShootBtnUI();
   
   const clubCard = state.hand.find(c=>c.uid===state.selectedClub);
   const ballCard = state.selectedBall ? state.hand.find(b=>b.uid===state.selectedBall) : null;
@@ -813,107 +881,111 @@ function executeShot() {
   let baseDist = clubCard.dist;
   if(ballCard?.effect==='power') baseDist = Math.round(baseDist*1.2);
   
-  const powerFactor = Math.max(0.05, Math.pow(state.powerVal, 1.6));
-  let shotDist = Math.round(baseDist * powerFactor);
+  // APLICAR LIE PENALTY
+  let lFactor = Math.max(0, Math.min(1, (clubCard.dist - 80) / 160));
+  let pDist = 0, pDevMulti = 1;
+  if (state.currentTerrain === 'rough') { pDist = 0.08 + (0.17 * lFactor); pDevMulti = 1.2 + (0.8 * lFactor); }
+  else if (state.currentTerrain === 'semirough') { pDist = 0.03 + (0.07 * lFactor); pDevMulti = 1.1 + (0.4 * lFactor); }
+  else if (state.currentTerrain === 'deeprough') { pDist = 0.12 + (0.25 * lFactor); pDevMulti = 1.4 + (1.0 * lFactor); }
+  else if (state.currentTerrain === 'bunker') { pDist = 0.20 + (0.30 * lFactor); pDevMulti = 1.5 + (1.5 * lFactor); }
   
+  const actualBaseDist = baseDist * (1 - pDist);
+  const powerFactor = Math.max(0.05, Math.pow(state.powerVal, 1.6));
+  let shotDist = Math.round(actualBaseDist * powerFactor);
+  
+  const startX = state.ball.x, startY = state.ball.y;
+  const dx = state.target.x - startX, dy = state.target.y - startY;
+  const targetPx = Math.hypot(dx, dy);
+  const dirX = targetPx === 0 ? 0 : dx/targetPx, dirY = targetPx === 0 ? -1 : dy/targetPx;
+  const perpX = -dirY, perpY = dirX;
+
   let deviation = 0;
   if(!clubCard.isPutt) {
     const aimOff = (state.aimVal - 0.5) * 2;
-    const diffMulti = 1 + (state.holeData.difficulty * 0.5); 
-    let devFactor = 0.06 * diffMulti;
+    let devFactor = 0.40 * (1 + state.holeData.difficulty * 0.5) * pDevMulti;
     if(ballCard?.effect==='control') devFactor *= 0.4;
     deviation = aimOff * shotDist * devFactor;
     
     if(ballCard?.effect !== 'heavy') {
-       const windH = Math.sin(state.wind.dir) * state.wind.speed;
-       deviation += windH * (shotDist/200) * 3;
+       const wX = Math.cos(state.wind.dir) * state.wind.speed, wY = Math.sin(state.wind.dir) * state.wind.speed;
+       deviation += (wX * perpX + wY * perpY) * (shotDist/100) * 1.5;
+       shotDist += (wX * dirX + wY * dirY) * (shotDist/100) * 1.0; 
+       shotDist = Math.max(5, shotDist);
     }
   }
   
-  animateFlight(shotDist, deviation, clubCard, ballCard);
+  state.prevPos = {x: state.ball.x, y: state.ball.y};
+  animateFlight(shotDist, deviation, clubCard, ballCard, dirX, dirY, perpX, perpY);
 }
 
-function animateFlight(dist, deviation, club, ballCard) {
+function animateFlight(dist, deviation, club, ballCard, dirX, dirY, perpX, perpY) {
   const hd = state.holeData;
   const startX = state.ball.x, startY = state.ball.y;
   
-  const dx = state.target.x - startX, dy = state.target.y - startY;
-  const targetPx = Math.sqrt(dx*dx + dy*dy);
-  const dirX = targetPx === 0 ? 0 : dx/targetPx;
-  const dirY = targetPx === 0 ? -1 : dy/targetPx;
-  const perpX = -dirY, perpY = dirX;
-  
-  const distPx = dist * hd.scale;
-  const devPx = deviation * hd.scale;
-  
-  const landX = startX + dirX*distPx + perpX*devPx;
-  const landY = startY + dirY*distPx + perpY*devPx;
-  
+  const distPx = dist * hd.scale, devPx = deviation * hd.scale;
+  const landX = startX + dirX*distPx + perpX*devPx, landY = startY + dirY*distPx + perpY*devPx;
   const landingTerrain = getTerrain(landX, landY);
   
   let rollDistM = dist * 0.15; 
   if (landingTerrain === 'green') rollDistM *= 0.6;
   else if (landingTerrain === 'fairway') rollDistM *= 1.2;
+  else if (landingTerrain === 'semirough') rollDistM *= 0.5;
   else if (landingTerrain === 'rough') rollDistM *= 0.2;
-  else if (landingTerrain === 'sand') rollDistM *= 0.02;
+  else if (landingTerrain === 'deeprough') rollDistM *= 0.1;
+  else if (landingTerrain === 'bunker' || landingTerrain === 'agua') rollDistM *= 0.02;
   
   if (ballCard?.effect === 'fallstop') rollDistM = 0;
   if (ballCard?.effect === 'backroll') rollDistM = -dist * 0.08;
-  if (ballCard?.effect === 'runner') rollDistM *= 2;
   
   const rollPx = rollDistM * hd.scale;
-  const rollDirX = dirX*distPx + perpX*devPx*1.5; 
-  const rollDirY = dirY*distPx + perpY*devPx*1.5;
-  const rollLen = Math.sqrt(rollDirX*rollDirX + rollDirY*rollDirY);
-  const finalRollDirX = rollLen===0 ? dirX : rollDirX/rollLen;
-  const finalRollDirY = rollLen===0 ? dirY : rollDirY/rollLen;
-
-  const finalX = landX + finalRollDirX * rollPx;
-  const finalY = landY + finalRollDirY * rollPx;
+  const rDX = dirX*distPx + perpX*devPx*1.5, rDY = dirY*distPx + perpY*devPx*1.5;
+  const rLen = Math.sqrt(rDX*rDX + rDY*rDY);
+  const fDX = rLen===0?dirX:rDX/rLen, fDY = rLen===0?dirY:rDY/rLen;
+  const finalX = landX + fDX * rollPx, finalY = landY + fDY * rollPx;
   
-  const airDur = 800 + dist * 1.5;
-  const rollDur = Math.max(200, Math.abs(rollDistM) * 30);
+  const airDur = 800 + dist * 1.5, rollDur = Math.max(200, Math.abs(rollDistM) * 30);
   
   let animPhase = 'air', phaseStart = performance.now();
-  const trace = [{x:startX,y:startY}];
-  state.ballAnim = {trace};
+  state.ballAnim = {trace: [{x:startX,y:startY}]};
   
   function frame(ts){
     const elapsed = ts - phaseStart;
     
     if (animPhase === 'air') {
       const t = Math.min(elapsed / airDur, 1);
-      const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
-      const arcT = Math.sin(t*Math.PI);
-      const maxArcR = club.isPutt ? 0.5 : (dist>150?14:dist>80?10:7);
-      
+      const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t, arcT = Math.sin(t*Math.PI);
       const curveEase = ease * ease; 
+      
       state.ball.x = startX + dirX*(distPx*ease) + perpX*(devPx*curveEase);
       state.ball.y = startY + dirY*(distPx*ease) + perpY*(devPx*curveEase) - arcT*80*(dist/200);
-      state.ball.airR = 5 + arcT * maxArcR;
+      state.ball.airR = 5 + (club.isPutt ? 0 : arcT * (dist>150?14:7));
       
-      if(t > 0.8 && Math.random()>0.5) trace.push({x:state.ball.x, y:state.ball.y});
-      if (t >= 1) { animPhase = 'roll'; phaseStart = ts; state.ball.airR = 5; }
+      if(t > 0.8 && Math.random()>0.5) state.ballAnim.trace.push({x:state.ball.x, y:state.ball.y});
+      
+      if (!club.isPutt && t > 0.1 && t < 0.9) {
+          for(let tree of hd.trees) {
+              if (Math.hypot(state.ball.x - tree.x, state.ball.y - tree.y) < tree.r + 2) {
+                  animPhase = 'roll'; phaseStart = ts; rollDistM = 1; state.ball.airR = 5;
+                  break;
+              }
+          }
+      }
+      
+      if (t >= 1 && animPhase==='air') { animPhase = 'roll'; phaseStart = ts; state.ball.airR = 5; }
     } else {
-      const t = Math.min(elapsed / rollDur, 1);
-      const ease = 1 - Math.pow(1 - t, 3);
+      const t = Math.min(elapsed / rollDur, 1), ease = 1 - Math.pow(1 - t, 3);
+      state.ball.x = landX + (finalX - landX)*ease; state.ball.y = landY + (finalY - landY)*ease;
       
-      state.ball.x = landX + (finalX - landX)*ease;
-      state.ball.y = landY + (finalY - landY)*ease;
+      if(Math.random()>0.7) state.ballAnim.trace.push({x:state.ball.x, y:state.ball.y});
+      const dHole = Math.hypot(state.ball.x - hd.holeX, state.ball.y - hd.holeY);
       
-      if(Math.random()>0.7) trace.push({x:state.ball.x, y:state.ball.y});
-      const distHolePx = Math.sqrt((state.ball.x - hd.holeX)**2 + (state.ball.y - hd.holeY)**2);
-      
-      if (club.isPutt && distHolePx <= 18 && animPhase === 'roll') {
-          const pull = 0.15;
-          state.ball.x += (hd.holeX - state.ball.x) * pull;
-          state.ball.y += (hd.holeY - state.ball.y) * pull;
+      if (club.isPutt && dHole <= 18 && animPhase === 'roll') {
+          state.ball.x += (hd.holeX - state.ball.x)*0.15; state.ball.y += (hd.holeY - state.ball.y)*0.15;
       }
 
-      if (distHolePx <= 10) { state.ball.x = hd.holeX; state.ball.y = hd.holeY; endShot(true); return; }
+      if (dHole <= 10) { state.ball.x = hd.holeX; state.ball.y = hd.holeY; endShot(true); return; }
       if (t >= 1) { endShot(false); return; }
     }
-    
     drawBall(); drawUI(); requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
@@ -921,27 +993,50 @@ function animateFlight(dist, deviation, club, ballCard) {
 
 function endShot(inHoleEarly) {
   const hd = state.holeData;
-  const distToHolePx = Math.sqrt((state.ball.x - hd.holeX)**2 + (state.ball.y - hd.holeY)**2);
-  state.distToHole = distToHolePx / hd.scale;
+  state.distToHole = Math.hypot(state.ball.x - hd.holeX, state.ball.y - hd.holeY) / hd.scale;
   
   const terrain = getTerrain(state.ball.x, state.ball.y);
-  updateDistDisplay(); drawBall(); drawUI();
+  drawBall(); drawUI(); resetMetersUI();
   
-  resetMetersUI(); // Limpiamos la UI
-  
-  if(inHoleEarly || state.distToHole <= 2.5) {
-    setTimeout(()=>holeComplete(), 400);
-  } else {
-    state.phase = 'card_select'; state.powerHeld = false;
-    state.target = {x: hd.holeX, y: hd.holeY};
-    dealCards(); 
-    updateShootBtnUI(); // Reinicia el botón
-    
-    const terrainLabels = {'green':'Green', 'fairway':'Fairway', 'rough':'Rough', 'sand':'Bunker'};
-    $('d-pos').textContent = terrainLabels[terrain] || 'Fairway';
-    
-    updateDistDisplay(); $('cards-row').style.pointerEvents = 'auto'; 
+  if(terrain === 'ob' || terrain === 'agua') {
+      const msgOverlay = $('msg-overlay');
+      $('msg-title').textContent = terrain === 'agua' ? "AGUA" : "FUERA DE LÍMITES";
+      $('msg-sub').textContent = "Penalización: +1 golpe";
+      $('msg-btn').textContent = 'Continuar';
+      msgOverlay.style.display = 'flex';
+      $('msg-btn').onclick = ()=>{
+          msgOverlay.style.display='none';
+          state.ball.x = state.prevPos.x; state.ball.y = state.prevPos.y;
+          state.strokes++;
+          state.distToHole = Math.hypot(state.ball.x - hd.holeX, state.ball.y - hd.holeY) / hd.scale;
+          
+          if (state.strokes >= hd.par + 5) {
+              holeComplete(true);
+          } else {
+              finishTurn(state.currentTerrain); 
+          }
+      };
+      return;
   }
+  
+  if(inHoleEarly || state.distToHole <= 2.5) setTimeout(()=>holeComplete(), 400);
+  else if (state.strokes >= hd.par + 5) setTimeout(()=>holeComplete(true), 400);
+  else finishTurn(terrain);
+}
+
+function finishTurn(terrain) {
+    discardPlayedCards(); drawCardsToHand();
+    state.phase = 'card_select'; state.powerHeld = false; state.itemLocked = false; state.currentTerrain = terrain;
+    state.target = {x: state.holeData.holeX, y: state.holeData.holeY};
+    
+    autoSelectBestClub();
+
+    updateShootBtnUI();
+    const lbls = {'green':'Green', 'fairway':'Fairway', 'semirough':'SemiRough', 'rough':'Rough', 'deeprough': 'Deep Rough', 'bunker':'Bunker', 'ob':'Fuera', 'agua':'Agua', 'tee':'Tee'};
+    $('d-pos').textContent = lbls[terrain] || 'Fairway';
+    $('d-hole').textContent = Math.round(state.distToHole)+' m';
+    $('cards-row').style.pointerEvents = 'auto'; 
+    updateReachDisplay();
 }
 
 // ─── HOLE FLOW ───────────────────────────────────────────────────────────────
@@ -949,79 +1044,91 @@ function startHole(holeIdx) {
   state.hole = holeIdx;
   setTimeout(()=>{
     resizeCanvases();
-    const hd = generateHole(holeIdx);
-    state.holeData = hd;
-    state.ball = {x: hd.teeX, y: hd.teeY, airR: 5};
-    state.target = {x: hd.holeX, y: hd.holeY};
-    state.strokes = 0;
-    state.distToHole = hd.holeLength;
-    state.phase = 'card_select';
-    state.powerHeld = false;
+    state.holeData = generateHole(holeIdx);
+    state.ball = {x: state.holeData.teeX, y: state.holeData.teeY, airR: 5};
+    state.target = {x: state.holeData.holeX, y: state.holeData.holeY};
+    state.strokes = 0; state.distToHole = state.holeData.holeLength;
+    state.phase = 'card_select'; state.powerHeld = false; state.itemLocked = false; state.currentTerrain = 'tee';
     
-    generateWind();
-    dealCards(); 
+    generateWind(); drawCardsToHand(); resetMetersUI(); $('cards-row').style.pointerEvents = 'auto';
+    $('h-hole').textContent = state.hole+1; $('h-par').textContent = state.holeData.par; $('h-strokes').textContent = 0;
+    $('d-hole').textContent = Math.round(state.distToHole)+' m'; $('d-pos').textContent = 'Tee';
     
-    resetMetersUI();
-    $('cards-row').style.pointerEvents = 'auto';
-    updateHUD(); updateDistDisplay(); drawCourse(); drawBall(); drawUI();
-    
-    $('d-pos').textContent = 'Tee';
-    updateShootBtnUI();
+    autoSelectBestClub();
+
+    drawCourse(); drawBall(); drawUI(); updateShootBtnUI(); updateReachDisplay();
   }, 50);
 }
 
-function updateHUD() {
-  const hd = state.holeData;
-  $('h-hole').textContent = state.hole+1;
-  $('h-par').textContent = hd.par;
-  $('h-strokes').textContent = state.strokes;
-  const scoreVal = state.totalScore;
-  $('h-score').textContent = scoreVal===0?'E':scoreVal>0?'+'+scoreVal:scoreVal;
-}
-
-function updateDistDisplay() {
-  const dist = state.distToHole;
-  if(dist !== undefined) $('d-hole').textContent = Math.round(dist)+' m';
-}
-
-function holeComplete() {
-  const par = state.holeData.par, strokes = state.strokes, diff = strokes - par;
+function holeComplete(maxLimit = false) {
+  if (state.strokes > state.holeData.par + 5) state.strokes = state.holeData.par + 5;
+  const diff = state.strokes - state.holeData.par;
   state.totalScore += diff;
-  state.scores.push({hole:state.hole+1, par, strokes, diff});
-  
-  const names = {'-3':'Albatross','-2':'Eagle','-1':'Birdie','0':'Par','1':'Bogey','2':'Doble Bogey'};
-  const scoreName = names[String(diff)] || (diff>0 ? '+'+diff : diff);
+  state.scores.push({hole:state.hole+1, par:state.holeData.par, strokes:state.strokes, diff});
   $('h-score').textContent = state.totalScore===0?'E':state.totalScore>0?'+'+state.totalScore:state.totalScore;
   
+  const names = {'-3':'Albatross','-2':'Eagle','-1':'Birdie','0':'Par','1':'Bogey','2':'Doble Bogey'};
   const msgOverlay = $('msg-overlay');
-  $('msg-title').textContent = scoreName;
-  $('msg-sub').textContent = `Hoyo ${state.hole+1} — ${strokes} golpes (Par ${par})`;
-  $('msg-btn').textContent = 'Continuar';
-  msgOverlay.style.display = 'flex';
+  
+  if (maxLimit) {
+      $('msg-title').textContent = "LÍMITE +5";
+      $('msg-sub').textContent = `Hoyo ${state.hole+1} — Has alcanzado el límite máximo de golpes permitidos.`;
+  } else {
+      $('msg-title').textContent = names[String(diff)] || (diff>0?'+'+diff:diff);
+      $('msg-sub').textContent = `Hoyo ${state.hole+1} — ${state.strokes} golpes (Par ${state.holeData.par})`;
+  }
+  
+  $('msg-btn').textContent = 'Continuar'; msgOverlay.style.display = 'flex';
   
   $('msg-btn').onclick = ()=>{
-    msgOverlay.style.display='none';
-    if(state.hole === 8) { 
-       showScorecard(true);
-    } else if (state.hole === 17) { 
-       showScorecard(false);
-    } else {
-       startHole(state.hole + 1);
+    msgOverlay.style.display='none'; discardPlayedCards(); 
+    if(state.hole === 8) showScorecard(true);
+    else if (state.hole === 17) showScorecard(false);
+    else startHole(state.hole + 1);
+  };
+}
+
+function showScorecard(isMidGame) {
+  $('score-title').textContent = isMidGame ? 'Front 9 (Ida)' : 'Resultados Finales';
+  const totalStr = state.totalScore===0?'E':state.totalScore>0?'+'+state.totalScore:state.totalScore;
+  $('score-sub').textContent = `Score: ${totalStr}`;
+  
+  let html = `<div class="sc-header"><span>HOYO</span><span>PAR</span><span>GOLPES</span><span>SCORE</span></div>`;
+  
+  let p=0, s=0;
+  for(let i=0; i < state.scores.length; i++) {
+    const sc = state.scores[i];
+    p += sc.par; s += sc.strokes;
+    const dStr = sc.diff===0?'E':sc.diff>0?'+'+sc.diff:sc.diff;
+    const color = sc.diff<0?'var(--accent)':sc.diff>0?'var(--danger)':'var(--text-muted)';
+    html += `<div class="sc-row"><span>#${i+1}</span><span>${sc.par}</span><span>${sc.strokes}</span><span style="color:${color}">${dStr}</span></div>`;
+    
+    if (i === 8 && !isMidGame) {
+        html += `<div class="sc-row total" style="color:var(--text-muted); border-top:1px dashed rgba(255,255,255,0.1)"><span>IDA</span><span>${p}</span><span>${s}</span><span></span></div>`;
     }
+  }
+  html += `<div class="sc-row total"><span>${isMidGame?'IDA':'TOTAL'}</span><span>${p}</span><span>${s}</span><span></span></div>`;
+  
+  $('score-table-wrap').innerHTML = html;
+  
+  $('score-btn').textContent = isMidGame ? 'Jugar la Vuelta' : 'Nueva Partida';
+  $('score-overlay').style.display = 'flex';
+  
+  $('score-btn').onclick = () => {
+    $('score-overlay').style.display = 'none';
+    if(isMidGame) startHole(9); else location.reload();
   };
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
 window.addEventListener('load', ()=>{
   resizeCanvases();
-  $('msg-warn').style.display = 'block';
-  $('msg-overlay').style.display = 'flex';
+  $('msg-warn').style.display = 'block'; $('version-text').style.display = 'block';
   $('msg-btn').onclick = () => {
-    $('msg-overlay').style.display = 'none';
-    $('msg-warn').style.display = 'none';
-    state.collection = INITIAL_COLLECTION.map(c => cloneCard(c));
+    $('msg-overlay').style.display = 'none'; $('msg-warn').style.display = 'none'; $('version-text').style.display = 'none';
     showDeckBuilder();
   }
+  $('msg-overlay').style.display = 'flex';
 });
 </script>
 </body>
