@@ -85,7 +85,7 @@ function bezierTangent(p0,p1,p2,p3,t) { return 3*(1-t)**2*(p1-p0) + 6*(1-t)*t*(p
 
 function generateHole(holeIndex) {
   const W = cCourse.width, H = cCourse.height, par = HOLE_PARS[holeIndex], difficulty = holeIndex / 17;
-  const isMobile = W <= 600; const teeY = isMobile ? H - 230 : H * 0.8; const visualLengthPx = isMobile ? teeY * 0.8 : H * 0.60;
+  const teeY = H * 0.88; const visualLengthPx = H * 0.72;
   const logicalDist = par === 3 ? 150+Math.random()*30 : par === 4 ? 330+Math.random()*70 : 490+Math.random()*60;
   const scale = visualLengthPx / logicalDist;
   const teeX = W/2, holeX = W/2 + (Math.random()-0.5)*W*(0.2 + difficulty*0.4), holeY = teeY - visualLengthPx;
