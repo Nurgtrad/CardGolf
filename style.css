@@ -13,11 +13,48 @@
 html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;overflow:hidden;touch-action:none}
 #game{display:flex;flex-direction:column;height:100%;height:100dvh;max-width:900px;margin:0 auto;position:relative}
 
-/* HUD TOP: Bloque sólido */
+/* HUD TOP */
 #hud{display:flex;justify-content:space-between;align-items:center;padding:calc(12px + env(safe-area-inset-top)) 20px 12px;background:var(--surface2);border-bottom:2px solid var(--border);z-index:20;flex-shrink:0;}
 .hud-stat{flex:1;text-align:center}
 .hud-label{font-size:10px;letter-spacing:0.1em;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px}
 .hud-value{font-size:20px;font-weight:400;color:var(--accent);font-family:'DM Serif Display',serif;line-height:1}
+
+/* AUDIO PANEL */
+#audio-panel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0,0,0,0.3);
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+#mute-btn {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+#volume-slider {
+  width: 60px;
+  height: 4px;
+  -webkit-appearance: none;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+#volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--accent);
+  border-radius: 50%;
+  border: 1px solid #000;
+}
 
 /* WIND WIDGET LATERAL */
 #wind-widget {
@@ -40,14 +77,14 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 #wind-flag-wrap { position:relative; width:30px; height:30px; margin-bottom:2px; }
 .wind-speed { font-size:10px; color:var(--accent2); font-weight:900; letter-spacing:0; text-align:center; line-height:1.2; }
 
-/* CANVAS (Se traga el espacio sobrante) */
+/* CANVAS */
 #canvas-wrap{flex:1;min-height:0;position:relative;overflow:hidden; cursor:crosshair;}
 canvas{position:absolute;top:0;left:0;width:100%;height:100%}
 #c-course{z-index:1}
 #c-ball{z-index:2}
 #c-ui{z-index:3}
 
-/* BOTTOM PANEL: Bloque sólido */
+/* BOTTOM PANEL */
 #bottom{background:var(--surface2); border-top:2px solid var(--border); padding:15px 20px calc(15px + env(safe-area-inset-bottom)); z-index:20; flex-shrink:0; display:flex; flex-direction:column; gap:12px;}
 #dist-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:0 2px}
 .dist-label{font-size:9px;letter-spacing:0.15em;color:var(--text-muted);text-transform:uppercase}
@@ -170,4 +207,6 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%}
   #deck-pile { width: 34px; height: 50px; }
   .hud-value { font-size: 16px; }
   #bottom { padding: 10px 10px calc(14px + env(safe-area-inset-bottom)); }
+  #volume-slider { width: 40px; }
+  #audio-panel { padding: 4px 8px; gap: 5px; }
 }

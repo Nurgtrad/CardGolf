@@ -15,6 +15,10 @@
     <div class="hud-stat"><div class="hud-label">Golpes</div><div class="hud-value" id="h-strokes">0</div></div>
     <div class="hud-stat"><div class="hud-label">Score</div><div class="hud-value" id="h-score">E</div></div>
     <div class="hud-stat"><div class="hud-label">Monedas</div><div class="hud-value" style="color:var(--accent2)" id="h-money">0</div></div>
+    <div id="audio-panel">
+      <button id="mute-btn" title="Silenciar">🔊</button>
+      <input type="range" id="volume-slider" min="0" max="0.5" step="0.05" value="0.2">
+    </div>
   </div>
 
   <div id="canvas-wrap">
@@ -29,7 +33,6 @@
       <div class="wind-speed" id="wind-text">0<br>m/s</div>
       <div id="wind-arrow" style="color:var(--accent2); font-size:18px; line-height:1; display:inline-block; transform-origin:center; font-weight:900;">➔</div>
     </div>
-    
     <canvas id="c-course"></canvas>
     <canvas id="c-ball"></canvas>
     <canvas id="c-ui"></canvas>
@@ -43,14 +46,10 @@
         <div style="text-align:right"><div class="dist-label">Posición</div><div class="dist-val" id="d-pos">Tee</div></div>
       </div>
       <div id="hand-container">
-        <div id="deck-pile">
-          <div class="deck-count" id="deck-count">24</div>
-          <div class="deck-label">Mazo</div>
-        </div>
+        <div id="deck-pile"><div class="deck-count" id="deck-count">24</div><div class="deck-label">Mazo</div></div>
         <div id="cards-row"></div>
       </div>
     </div>
-
     <div id="bottom-actions">
       <div id="meters-row">
         <div id="meter-power"><div class="meter-label">Fuerza</div><div class="meter-track" id="power-track"><div class="meter-fill" id="power-fill" style="width:0%"></div></div><div class="meter-action">Botón o Espacio</div></div>
@@ -424,13 +423,13 @@
             </g>
           </g>
         </g>
-      </svg>
+      </svg>  
     </div>
     <div class="msg-title" id="msg-title"></div>
     <div class="msg-sub" id="msg-sub">Golf Procedural · 18 Hoyos</div>
     <div class="warning" id="msg-warn" style="display:none">⚠️ ADVERTENCIA<br>Refrescar el navegador borrará tu progreso y tu colección de cartas para siempre.</div>
     <button class="msg-btn" id="msg-btn">Jugar</button>
-    <div id="version-text" style="margin-top:10px; font-size:10px; color:var(--text-muted); letter-spacing:0.1em; text-transform:uppercase; display:none;">DECK GOLF by Javier A. Murillo  -  VER. 0.6.1  -  2026</div>
+    <div id="version-text" style="margin-top:10px; font-size:10px; color:var(--text-muted); letter-spacing:0.1em; text-transform:uppercase; display:none;">DECK GOLF by Javier A. Murillo  -  Ver. 0.8.0  -  2026</div>
   </div>
 
   <div id="deck-overlay" class="overlay">
@@ -460,7 +459,7 @@
 
   <div id="softlock-overlay" class="overlay" style="z-index: 45;">
     <div class="msg-title" style="font-size: 28px;">Sin Palos</div>
-    <div class="msg-sub">No tienes palos para golpear. Selecciona las cartas que quieres devolver al mazo para robar nuevas (Mínimo 1).</div>
+    <div class="msg-sub">No tienes palos para golpear. Selecciona cartas para devolver al mazo y robar nuevas.</div>
     <div id="softlock-cards" style="display:flex; gap:6px; justify-content:center; margin: 15px 0;"></div>
     <button class="msg-btn" id="softlock-btn" disabled>Barajar y Robar</button>
   </div>
@@ -474,7 +473,7 @@
 
   <div id="pick-reward-overlay" class="overlay" style="z-index: 51;">
     <div class="msg-title" id="pick-title">¡Birdie!</div>
-    <div class="msg-sub" id="pick-sub">Elige 1 carta de las 3 opciones.</div>
+    <div class="msg-sub" id="pick-sub">Elige tu carta de recompensa.</div>
     <div id="pick-cards" style="display:flex; gap:12px; justify-content:center; margin: 20px 0;"></div>
     <button class="msg-btn" id="pick-btn" disabled>Continuar</button>
   </div>
@@ -482,27 +481,21 @@
   <div id="shop-overlay" class="overlay" style="z-index: 55;">
     <div class="msg-title" style="color:var(--accent2);">Tienda</div>
     <div class="msg-sub">Monedas: <span id="shop-money" style="color:var(--accent2); font-weight:bold; font-size:16px;">0</span> 🪙<br>Cartas en bolsa: <span id="shop-total-cards" style="font-weight:bold; color:var(--text);">0</span></div>
-    
     <div id="shop-grid" style="display:flex; flex-wrap:wrap; gap:14px 10px; justify-content:center; max-width:800px; max-height:40vh; overflow-y:auto; overflow-x:hidden; padding:20px 10px; align-content:flex-start; margin-top:10px;"></div>
-    
     <div class="shop-checkout" style="display:flex; justify-content:space-between; align-items:center; width:100%; max-width:800px; border-top:1px dashed var(--border); padding-top:15px; margin-top:10px;">
-        <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); text-align:left;">
-            Total<br><span id="shop-cost" style="font-size:24px; font-weight:bold; color:var(--text); font-family:'DM Serif Display',serif;">0</span> <span style="font-size:14px;">🪙</span>
-        </div>
-        <div style="display:flex; gap:10px;">
-            <button class="msg-btn" id="shop-exit-btn" style="background:var(--surface2); color:var(--text); margin-top:0;">Salir Tienda</button>
-            <button class="msg-btn" id="shop-buy-btn" style="margin-top:0;" disabled>Comprar</button>
-        </div>
+        <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); text-align:left;">Total<br><span id="shop-cost" style="font-size:24px; font-weight:bold; color:var(--text); font-family:'DM Serif Display',serif;">0</span> <span style="font-size:14px;">🪙</span></div>
+        <div style="display:flex; gap:10px;"><button class="msg-btn" id="shop-exit-btn" style="background:var(--surface2); color:var(--text); margin-top:0;">Salir Tienda</button><button class="msg-btn" id="shop-buy-btn" style="margin-top:0;" disabled>Comprar</button></div>
     </div>
   </div>
 
   <div id="gameover-overlay" class="overlay" style="z-index: 60;">
     <div class="msg-title" style="color:var(--danger);">Bolsa Vacía</div>
-    <div class="msg-sub">No te quedan palos en la mano ni cartas en el mazo. Has tenido que abandonar el torneo.</div>
+    <div class="msg-sub">No te quedan palos en la mano ni cartas en el mazo.</div>
     <button class="msg-btn" onclick="location.reload()">Volver al Inicio</button>
   </div>
-
 </div>
+
+<script src="audio.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
