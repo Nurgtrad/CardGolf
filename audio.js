@@ -1,9 +1,5 @@
 /**
  * DECK GOLF - 16-bit Audio Engine vFinal
- * - Arreglos largos (30s+)
- * - Tensión mejorada (tic-tac ansioso)
- * - Humanización de SFX (Pitch Randomization)
- * - Desbloqueo Ninja para iOS (Safari/WebKit)
  */
 const AudioEngine = (() => {
     let ctx = null;
@@ -14,32 +10,25 @@ const AudioEngine = (() => {
     let isMuted = false;
     let lastVolume = 0.3;
 
-    // Calculadora de frecuencias MIDI a Hz
-    const _ = 0; // Silencio
+    const _ = 0;
     const f = (n) => n === 0 ? 0 : 440 * Math.pow(2, (n - 69) / 12);
 
-    // --- COMPOSICIÓN DE PATRONES ---
-    // [Nota Lead (MIDI), Nota Bajo (MIDI), Percusión (0-3)]
-    
-    // MENÚ (Chill Bossa/Jazz)
+    // PATRONES [Lead, Bass, Drum]
     const mA = [[64,48,1], [_,_,3], [67,_,3], [_,_,0], [71,_,2], [_,43,3], [69,_,3], [67,_,0], [65,41,1], [_,_,3], [69,_,3], [_,_,0], [72,_,2], [_,45,3], [71,_,3], [69,_,0]];
     const mB = [[67,48,1], [_,_,3], [71,_,3], [_,_,0], [74,_,2], [_,43,3], [72,_,3], [71,_,0], [69,45,1], [_,_,3], [72,_,3], [_,_,0], [76,_,2], [_,47,3], [74,_,3], [72,_,0]];
     const mC = [[65,41,1], [_,_,3], [69,_,3], [_,_,0], [72,_,2], [_,45,3], [71,_,3], [69,_,0], [67,43,1], [_,_,3], [71,_,3], [_,_,0], [74,_,2], [_,43,3], [72,_,3], [71,_,0]];
     const mD = [[60,36,1], [64,_,3], [67,_,3], [72,_,0], [_,_,2], [71,43,3], [69,_,3], [67,_,0], [65,41,1], [_,_,3], [64,_,3], [62,_,0], [60,_,2], [_,45,3], [59,_,3], [_,_,0]];
 
-    // JUEGO (Arcade Slap Funk)
     const gA = [[72,36,1], [_,_,3], [70,_,3], [67,48,0], [65,_,2], [67,46,3], [_,_,3], [63,_,0], [60,36,1], [_,_,3], [63,_,3], [_,48,1], [65,_,2], [_,_,3], [67,46,3], [_,_,0]];
     const gB = [[75,41,1], [_,_,3], [72,_,3], [70,53,0], [67,_,2], [70,51,3], [_,_,3], [65,_,0], [63,41,1], [_,_,3], [65,_,3], [_,53,1], [67,_,2], [_,_,3], [72,51,3], [_,_,0]];
     const gC = [[67,43,1], [_,_,3], [67,_,3], [70,43,0], [72,_,2], [_,_,3], [74,_,3], [75,_,0], [74,43,1], [72,_,3], [70,_,3], [67,_,0], [65,_,2], [63,_,3], [60,_,3], [58,_,0]];
-    const gD = [[_,36,1], [_,_,3], [_,36,3], [_,_,0], [_,36,2], [_,_,3], [_,36,3], [_,_,0], [_,36,1], [_,36,3], [_,36,3], [_,36,0], [_,36,2], [_,36,3], [_,36,3], [_,36,1]]; // Redoble
+    const gD = [[_,36,1], [_,_,3], [_,36,3], [_,_,0], [_,36,2], [_,_,3], [_,36,3], [_,_,0], [_,36,1], [_,36,3], [_,36,3], [_,36,0], [_,36,2], [_,36,3], [_,36,3], [_,36,1]];
 
-    // TENSIÓN MEJORADA (Tic-Tac ansioso y latido)
-    // 84 es C6 (agudo), 85 es C#6 (disonante)
     const tA = [[84,36,1], [_,_,0], [85,_,0], [_,_,0], [84,_,1], [_,_,0], [85,_,0], [_,_,0]];
 
     const trackMenu = { bpm: 110, score: [...mA, ...mB, ...mA, ...mC, ...mA, ...mB, ...mD, ...mC, ...mA, ...mB, ...mA, ...mC, ...mA, ...mB, ...mD, ...mD] };
     const trackGame = { bpm: 125, score: [...gA, ...gA, ...gB, ...gA, ...gC, ...gB, ...gA, ...gD, ...gA, ...gA, ...gB, ...gA, ...gC, ...gC, ...gD, ...gD] };
-    const trackTension = { bpm: 130, score: tA }; // Loop corto y rápido
+    const trackTension = { bpm: 130, score: tA }; 
 
     const init = () => {
         if (ctx) return;
@@ -49,24 +38,19 @@ const AudioEngine = (() => {
         mainGain.connect(ctx.destination);
     };
 
-    // --- DESBLOQUEO NINJA PARA iOS (Safari/WebKit) ---
+    // Parche iOS: Desbloquear motor de audio al primer toque
     const unlockAudio = () => {
         init();
         if (ctx.state === 'suspended') ctx.resume();
-        // Creamos un sonido vacío de 1 milisegundo para engañar a iOS
         const buffer = ctx.createBuffer(1, 1, 22050);
         const source = ctx.createBufferSource();
         source.buffer = buffer;
         source.connect(ctx.destination);
         if(source.start) source.start(0); else source.noteOn(0);
-        
-        // Una vez desbloqueado, quitamos los escuchadores
         document.removeEventListener('touchstart', unlockAudio);
         document.removeEventListener('touchend', unlockAudio);
         document.removeEventListener('click', unlockAudio);
     };
-    
-    // Escuchamos el primer toque en la pantalla
     document.addEventListener('touchstart', unlockAudio, {once: true});
     document.addEventListener('touchend', unlockAudio, {once: true});
     document.addEventListener('click', unlockAudio, {once: true});
@@ -117,7 +101,6 @@ const AudioEngine = (() => {
         const stepTime = (60 / currentTrack.bpm) / 4;
         const data = currentTrack.score[currentStep % currentTrack.score.length];
         
-        // En la pista de tensión, hacemos el lead mucho más cortito y punzante (staccato)
         const isTension = currentTrack === trackTension;
         playLead(f(data[0]), now, isTension ? stepTime * 0.3 : stepTime * 1.5);
         playBass(f(data[1]), now, stepTime * 0.9);
@@ -142,8 +125,7 @@ const AudioEngine = (() => {
             const now = ctx.currentTime; const sfxG = ctx.createGain(); sfxG.connect(ctx.destination);
             sfxG.gain.value = mainGain.gain.value * 1.5;
             
-            // HUMANIZACIÓN: Pequeña variación de tono aleatoria
-            const detune = (Math.random() - 0.5) * 60; 
+            const detune = (Math.random() - 0.5) * 60; // Humanización
             
             if (type === 'hit') {
                 const osc = ctx.createOscillator(); osc.frequency.setValueAtTime(800 + detune, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);

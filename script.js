@@ -30,7 +30,9 @@ let state = {
 function cloneCard(c) { return {...c, uid: Math.random().toString(36).substr(2, 9)}; }
 function shuffle(array) { for(let i=array.length-1; i>0; i--){ const j=Math.floor(Math.random()*(i+1)); [array[i], array[j]] = [array[j], array[i]]; } return array; }
 function showToast(text) { const t = document.createElement('div'); t.textContent = text; t.style.cssText = 'position:absolute;top:25%;left:50%;transform:translate(-50%,-50%);background:var(--accent2);color:#000;padding:12px 24px;border-radius:30px;font-family:"DM Mono",monospace;font-size:12px;text-transform:uppercase;font-weight:bold;z-index:100;box-shadow:0 10px 20px rgba(0,0,0,0.5);pointer-events:none;animation:toastFade 2s forwards;text-align:center;'; $('game').appendChild(t); setTimeout(()=>t.remove(), 2000); }
-const getTotalBalls = () => state.hand.filter(c=>c.type==='ball').length + state.drawPile.filter(c=>c.type==='ball').length;
+
+// Calcula cuántos objetos (bolas) tiene el jugador en total
+const getTotalObjects = () => state.hand.filter(c=>c.type==='ball').length + state.drawPile.filter(c=>c.type==='ball').length;
 
 let vfxList = [];
 function addRipple(x, y) { vfxList.push({type: 'ripple', x, y, age: 0, maxAge: 600}); }
@@ -123,7 +125,6 @@ function generateHole(holeIndex) {
   
   const greenR = Math.max(30, 50 - difficulty*15);
   
-  // EL SÚPER BOSQUE: Generamos cientos de Pinos, Arbustos y Flores empaquetados fuera del campo
   let trees = [];
   for(let i=0; i<Math.floor(600+difficulty*400); i++) {
       let tx, ty, valid = false, attempts = 0;
@@ -211,8 +212,6 @@ function createTerrainPaths(hd) {
 function getTerrain(x, y) {
   try {
     const hd = state.holeData; if(!hd) return 'fairway';
-    
-    // CORRECCIÓN RADAR O.B.: Sincronizamos las coordenadas con la resolución Retina del móvil
     const px = x * DPR, py = y * DPR;
 
     for (let r of hd.rivers) if (Math.abs(y - (r.y + (x - CW/2) * r.angle + Math.sin(x/50 + r.phase)*10)) <= r.width/2) return 'agua';
@@ -220,7 +219,6 @@ function getTerrain(x, y) {
     if (Math.hypot(x - hd.holeX, y - hd.holeY) <= hd.greenR + 6) return 'green';
     for(let s of hd.sandTraps) { const nx=x-s.cx, ny=y-s.cy, rdx=nx*Math.cos(-s.angle)-ny*Math.sin(-s.angle), rdy=nx*Math.sin(-s.angle)+ny*Math.cos(-s.angle); if((rdx*rdx)/(s.rx*s.rx)+(rdy*rdy)/(s.ry*s.ry)<=1) return 'bunker'; }
     
-    // Leemos usando PX y PY adaptados al DPR
     if (state.paths.fairway && ctxC.isPointInPath(state.paths.fairway, px, py)) return 'fairway';
     if (state.paths.semirough && ctxC.isPointInPath(state.paths.semirough, px, py)) return 'semirough';
     if (state.paths.rough && ctxC.isPointInPath(state.paths.rough, px, py)) return 'rough';
@@ -241,13 +239,21 @@ function getFairwayPattern(ctx) {
 function drawCourse() {
   const W = CW, H = CH, hd = state.holeData; if(!hd) return;
   
-  // SOLUCIÓN ARTIFACTS: El fondo lienzo ahora es VERDE O.B. PROFUNDO. Si se crean agujeros se verá esto, quedando perfecto.
+  // 1. Fondo Oscuro Principal (O.B.)
   ctxC.fillStyle = '#111a0e';
   ctxC.fillRect(0,0,W,H);
 
   state.paths = createTerrainPaths(hd);
   
-  // Líneas punteadas del límite del campo
+  // 2. PARCHE SPLINE: Capa base color Rough bajo el terreno para tapar posibles "agujeros" matemáticos
+  ctxC.lineWidth = hd.fairwayW * 2.8 + 40; 
+  ctxC.strokeStyle = '#1e3218'; // Color Rough
+  ctxC.lineCap = 'round'; ctxC.lineJoin = 'round';
+  ctxC.beginPath(); ctxC.moveTo(hd.teeX, hd.teeY);
+  ctxC.bezierCurveTo(hd.cp1x, hd.cp1y, hd.cp2x, hd.cp2y, hd.holeX, hd.holeY);
+  ctxC.stroke();
+  
+  // 3. Límites punteados del O.B.
   ctxC.setLineDash([8,8]); ctxC.strokeStyle = 'rgba(255,255,255,0.4)'; ctxC.lineWidth = 2;
   if(hd.obFlanks.left.length) { ctxC.beginPath(); ctxC.moveTo(hd.obFlanks.left[0].x, hd.obFlanks.left[0].y); for(let i=1; i<hd.obFlanks.left.length; i++) ctxC.lineTo(hd.obFlanks.left[i].x, hd.obFlanks.left[i].y); ctxC.stroke(); }
   if(hd.obFlanks.right.length) { ctxC.beginPath(); ctxC.moveTo(hd.obFlanks.right[0].x, hd.obFlanks.right[0].y); for(let i=1; i<hd.obFlanks.right.length; i++) ctxC.lineTo(hd.obFlanks.right[i].x, hd.obFlanks.right[i].y); ctxC.stroke(); }
@@ -271,7 +277,6 @@ function drawCourse() {
   ctxC.fillStyle='#173614'; ctxC.beginPath(); ctxC.ellipse(hd.teeX, hd.teeY, 26, 14, 0, 0, Math.PI*2); ctxC.fill();
   ctxC.fillStyle='#ffffff'; ctxC.beginPath(); ctxC.arc(hd.teeX-12, hd.teeY, 2.5, 0, Math.PI*2); ctxC.fill(); ctxC.beginPath(); ctxC.arc(hd.teeX+12, hd.teeY, 2.5, 0, Math.PI*2); ctxC.fill();
   
-  // DIBUJADO DE LA SÚPER FLORA
   hd.trees.forEach(t => { 
       if(t.type === 'tree') {
           ctxC.fillStyle='#3a2a18'; ctxC.fillRect(t.x-2, t.y, 4, 12); 
@@ -360,9 +365,23 @@ function drawCardsToHand() {
   const hP = (state.holeData.greenR/state.holeData.scale)>30, pT = hP?70:40, pD = hP?60:30;
   const sHP = state.currentTerrain==='green' || (['fairway','semirough','tee'].includes(state.currentTerrain) && state.distToHole<=pT);
   if(sHP && typeof AudioEngine!=='undefined') AudioEngine.playBGM('tension');
+  
+  // SOLUCIÓN PUTTER: El Putter es 100% gratuito. Quitamos cualquier putter viejo
   const ePI = state.hand.findIndex(c=>c.isPutt);
-  if(sHP){ let p={baseId:'putt',name:'Putt',dist:pD,icon:'🕳',type:'club',isPutt:true}; if(ePI!==-1){if(state.hand[ePI].dist!==pD)state.hand[ePI]=cloneCard(p);}else{let i=state.hand.findIndex(c=>c.type==='club'); if(i!==-1)state.hand[i]=cloneCard(p); else state.hand.push(cloneCard(p));} } else if(ePI!==-1) state.hand.splice(ePI,1);
-  while(state.hand.length<5) { if(!state.drawPile.length)break; state.hand.push(state.drawPile.pop()); }
+  if(ePI !== -1) state.hand.splice(ePI,1);
+
+  // Llenamos la mano SOLO con cartas normales (hasta 5)
+  while(state.hand.length < 5) { 
+      if(!state.drawPile.length) break; 
+      state.hand.push(state.drawPile.pop()); 
+  }
+
+  // Y si estamos cerca, añadimos el putter EXTRA sin eliminar nada
+  if(sHP){ 
+      let p={baseId:'putt',name:'Putt',dist:pD,icon:'🕳',type:'club',isPutt:true}; 
+      state.hand.push(cloneCard(p));
+  }
+  
   if(!state.hand.some(c=>c.type==='club') && state.currentTerrain!=='green' && state.hand.length>0) return state.drawPile.some(c=>c.type==='club') ? showSoftlockOverlay() : $('gameover-overlay').style.display='flex';
   if(!state.hand.length && !state.drawPile.length) return $('gameover-overlay').style.display='flex';
   $('deck-count').textContent=state.drawPile.length; renderCards();
@@ -421,14 +440,14 @@ function showSoftlockOverlay() {
 
 function grantReward(n, t, cb) {
     $('reward-title').textContent=t; $('reward-cards').innerHTML='';
-    let pool = getTotalBalls() >= 6 ? CARDS_POOL.filter(c=>c.type==='club') : CARDS_POOL;
+    let pool = getTotalObjects() >= 6 ? CARDS_POOL.filter(c=>c.type==='club') : CARDS_POOL;
     for(let i=0;i<n;i++){ const c=cloneCard(pool[Math.floor(Math.random()*pool.length)]); state.drawPile.push(c); const d=document.createElement('div'); d.className='card'+(c.type==='ball'?' ball-card':''); d.innerHTML=`<span class="card-type">${c.type==='club'?'Palo':'Bola'}</span><div class="card-icon">${c.icon}</div><div class="card-name">${c.name}</div>${c.type==='club'?`<div class="card-dist">~${c.dist}m</div>`:`<div class="card-dist gold">${c.icon}</div>`}`; $('reward-cards').appendChild(d); }
     shuffle(state.drawPile); $('reward-overlay').style.display='flex'; $('reward-btn').onclick=()=>{ $('reward-overlay').style.display='none'; if(cb)cb(); };
 }
 
 function showPickReward(n, cb) {
     $('pick-title').textContent=n>1?"¡Eagle o Mejor!":"¡Birdie!"; $('pick-sub').textContent=`Elige ${n} carta${n>1?'s':''} de las 3. (Max 6 objetos)`; $('pick-cards').innerHTML=''; let pL=n; $('pick-btn').disabled=true;
-    let pool = getTotalBalls() >= 6 ? CARDS_POOL.filter(c=>c.type==='club') : CARDS_POOL;
+    let pool = getTotalObjects() >= 6 ? CARDS_POOL.filter(c=>c.type==='club') : CARDS_POOL;
     for(let i=0;i<3;i++){
         const c=pool[Math.floor(Math.random()*pool.length)], d=document.createElement('div'); d.className='card face-down';
         const bD=document.createElement('div'); bD.style.cssText='font-size:30px;'; bD.textContent='❓';
