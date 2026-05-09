@@ -23,7 +23,6 @@ function generateMissions(par) {
   if(!state.holeData.prizeZones || state.holeData.prizeZones.length === 0) avail = avail.filter(m=>m.id!=='prize');
   if(!state.holeData.sandTraps || state.holeData.sandTraps.length === 0) avail = avail.filter(m=>m.id!=='bunker');
   
-  // Garantizar que la misión del palo se basa estrictamente en la mano
   let myHandClubs = state.hand.filter(c => c.type === 'club' && !c.isPutt);
   let myClubNames = [...new Set(myHandClubs.map(c => c.name))];
 
@@ -35,12 +34,14 @@ function generateMissions(par) {
   let hasUpgMission = false;
   let hasNoc200 = false;
   let hasDrive = false;
+  let hasClub = false; // Control de colisión lógica
   
   for(let i=0; i<count; i++) {
      let currentAvail = avail.filter(m => {
+         // Exclusiones mutuas estrictas para no pedir imposibles
          if (hasUpgMission && ['u0','u1','u2'].includes(m.id)) return false;
-         if (hasNoc200 && m.id === 'drive') return false;
-         if (hasDrive && m.id === 'noc200') return false;
+         if (hasNoc200 && (m.id === 'drive' || m.id === 'club')) return false; 
+         if ((hasDrive || hasClub) && m.id === 'noc200') return false; 
          if (m.id === 'club' && myClubNames.length === 0) return false;
          return true;
      });
@@ -53,6 +54,7 @@ function generateMissions(par) {
      if(['u0','u1','u2'].includes(m.id)) hasUpgMission = true;
      if(m.id === 'noc200') hasNoc200 = true;
      if(m.id === 'drive') hasDrive = true;
+     if(m.id === 'club') hasClub = true;
      
      let val = null;
      if(m.id==='drive') {
@@ -73,12 +75,15 @@ function generateMissions(par) {
   renderMissions();
 }
 
-// SOLUCIÓN AL PANEL TAPANDO EL HOYO: Posicionamiento inteligente
 function renderMissions() {
   const p = $('missions-panel'); p.innerHTML='';
   
   if(state.holeData) {
       const W = $('canvas-wrap').clientWidth;
+      // Forzamos un top más bajo para que no choque con el viento en móviles. 
+      // ¡AQUÍ ES DONDE LO PUEDES CAMBIAR A MANO SI QUIERES!
+      p.style.top = '130px'; 
+      
       if (state.holeData.holeX > W / 2) {
           p.style.right = 'auto'; p.style.left = '15px'; p.style.alignItems = 'flex-start';
       } else {
@@ -158,7 +163,7 @@ function animateFlight(d, dev, c, dX, dY, pX, pY) {
 
 function createMulliganUI() {
     let m = $('mulligan-overlay');
-    if (!m) { m = document.createElement('div'); m.id='mulligan-overlay'; m.className='overlay'; m.style.zIndex=70; m.innerHTML=`<div class="msg-title" style="font-size:28px;" id="mul-title">¡Oh no!</div><div class="msg-sub">Tienes un ⏪ Mulligan. ¿Quieres gastarlo para rebobinar el tiempo y recuperar tu tiro?</div><div style="display:flex; gap:10px; margin-top:10px;"><button class="msg-btn" id="mul-btn-no" style="background:var(--surface2); color:var(--text);">Penalización</button><button class="msg-btn" id="mul-btn-yes">Usar Mulligan</button></div>`; $('game').appendChild(m); }
+    if (!m) { m = document.createElement('div'); m.id='mulligan-overlay'; m.className='overlay'; m.style.zIndex=70; m.innerHTML=`<div class="msg-title" style="font-size:28px;" id="mul-title">¡Oh no!</div><div class="msg-sub">Tienes un ⏪ Mulligan en la mano. ¿Quieres gastarlo para rebobinar el tiempo y recuperar tu tiro (y las cartas gastadas)?</div><div style="display:flex; gap:10px; margin-top:10px;"><button class="msg-btn" id="mul-btn-no" style="background:var(--surface2); color:var(--text);">Penalización</button><button class="msg-btn" id="mul-btn-yes">Usar Mulligan</button></div>`; $('game').appendChild(m); }
     return m;
 }
 
