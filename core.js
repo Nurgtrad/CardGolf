@@ -20,23 +20,36 @@ function generateMissions(par) {
   if(!state.holeData.prizeZones || state.holeData.prizeZones.length === 0) avail = avail.filter(m=>m.id!=='prize');
   if(!state.holeData.sandTraps || state.holeData.sandTraps.length === 0) avail = avail.filter(m=>m.id!=='bunker');
   
-  let myClubsObjects = [...state.hand, ...state.drawPile].filter(c => c.type === 'club');
-  let myClubNames = myClubsObjects.map(c => c.name);
-  let shortClubs = ['Pitch W', 'Gap W', 'Sand W', 'Lob W', '9 Iron', '8 Iron'].filter(name => myClubNames.includes(name));
-  if(shortClubs.length === 0) avail = avail.filter(m=>m.id!=='club');
+  let myHandClubs = state.hand.filter(c => c.type === 'club' && !c.isPutt);
+  let myClubNames = myHandClubs.map(c => c.name);
+
+  if(myHandClubs.length === 0) {
+      avail = avail.filter(m=>m.id!=='club' && m.id!=='drive');
+  }
 
   state.missions = [];
+  let hasUpgMission = false; // SOLUCIÓN: Flag para evitar múltiples misiones de mejoras
+  
   for(let i=0; i<count; i++) {
-     if(avail.length===0) break;
-     let m = avail.splice(Math.floor(Math.random()*avail.length), 1)[0];
-     let val = null;
+     let currentAvail = avail.filter(m => {
+         if (hasUpgMission && ['u0','u1','u2'].includes(m.id)) return false;
+         return true;
+     });
      
+     if(currentAvail.length===0) break;
+     
+     let m = currentAvail.splice(Math.floor(Math.random()*currentAvail.length), 1)[0];
+     avail = avail.filter(x => x.id !== m.id); // Elimina de la pool global
+     
+     if(['u0','u1','u2'].includes(m.id)) hasUpgMission = true;
+     
+     let val = null;
      if(m.id==='drive') {
-         let maxDist = Math.max(150, ...myClubsObjects.map(c=>c.dist));
+         let maxDist = Math.max(150, ...myHandClubs.map(c=>c.dist));
          val = [maxDist - 30, maxDist - 15, maxDist][Math.floor(Math.random()*3)];
      }
      
-     if(m.id==='club') val = shortClubs[Math.floor(Math.random()*shortClubs.length)];
+     if(m.id==='club') val = myClubNames[Math.floor(Math.random()*myClubNames.length)];
      if(m.id==='score') { let s = par===3 ? ['Par','Birdie'] : par===4 ? ['Par','Birdie','Eagle'] : ['Par','Birdie','Eagle','Albatross']; val = s[Math.floor(Math.random()*s.length)]; }
      
      state.missions.push({ ...m, v: val, done: false });
@@ -122,7 +135,6 @@ function createMulliganUI() {
     return m;
 }
 
-// NUEVA FUNCIÓN: Dialogo de distancia de Drive
 function showDriveDistance(x, y, dist) {
     const el = document.createElement('div');
     el.textContent = `${dist}m`;
@@ -156,9 +168,10 @@ function endShot(iHE, fT) {
   if(['bunker','agua','ob'].includes(t)) state.m_hz = true;
   let sD = Math.round(Math.hypot(state.ball.x - state.prevPos.x, state.ball.y - state.prevPos.y) / hd.scale);
   
-  // SOLUCIÓN AL DIALOGO DE DISTANCIA DEL DRIVE
+  let delaySlot = 0;
   if (state.strokes === 1 && !['ob','agua'].includes(t)) {
       showDriveDistance(state.ball.x, state.ball.y, sD);
+      delaySlot = 2500; // SOLUCIÓN: Esperar a que el texto desaparezca para abrir el Slot
   }
 
   let pZHit = null; let pZSpins = 0; let baseCash = 0;
@@ -176,7 +189,12 @@ function endShot(iHE, fT) {
   });
 
   const proceed = () => { if(iHE||state.distToHole<=3.0) setTimeout(()=>holeComplete(false),600); else if(state.strokes>=hd.par+5) setTimeout(()=>holeComplete(true),600); else finishTurn(t); };
-  if(pZHit) showSlotMachine(pZSpins, baseCash, proceed); else proceed();
+  
+  if(pZHit) {
+      setTimeout(() => { showSlotMachine(pZSpins, baseCash, proceed); }, delaySlot);
+  } else { 
+      proceed(); 
+  }
 }
 
 function applyPenalty(t) {
@@ -208,7 +226,12 @@ function startHole(idx) {
   state.m_hz=false; state.m_upgs=0; state.m_c200=false;
   resizeCanvases(); state.holeData=generateHole(idx); state.ball={x:state.holeData.teeX, y:state.holeData.teeY, airR:5}; state.target={x:state.holeData.holeX, y:state.holeData.holeY}; state.distToHole=state.holeData.holeLength;
   $('h-hole').textContent=state.hole+1; $('h-par').textContent=state.holeData.par; $('h-strokes').textContent=0; $('d-hole').textContent=Math.round(state.distToHole)+' m'; $('d-pos').textContent='Tee';
-  generateWind(); generateMissions(state.holeData.par); drawCardsToHand(); resetMetersUI(); autoSelectBestClub(); drawCourse(); drawBall(); drawUI(); updateShootBtnUI(); updateReachDisplay(); $('cards-row').style.pointerEvents='auto';
+  
+  generateWind(); 
+  drawCardsToHand(); 
+  generateMissions(state.holeData.par); 
+  
+  resetMetersUI(); autoSelectBestClub(); drawCourse(); drawBall(); drawUI(); updateShootBtnUI(); updateReachDisplay(); $('cards-row').style.pointerEvents='auto';
   if(typeof AudioEngine!=='undefined') AudioEngine.playBGM('game');
 }
 
