@@ -30,8 +30,8 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 #wind-flag-wrap { position:relative; width:30px; height:30px; margin-bottom:2px; }
 .wind-speed { font-size:10px; color:var(--accent2); font-weight:900; letter-spacing:0; text-align:center; line-height:1.2; }
 
-/* MISSIONS PANEL (Movido a la derecha) */
-#missions-panel { position: absolute; top: 15px; right: 15px; z-index: 20; display: flex; flex-direction: column; gap: 4px; pointer-events: none; align-items: flex-end; }
+/* MISSIONS PANEL: Posicionamiento dinámico desde JS */
+#missions-panel { position: absolute; top: 95px; z-index: 20; display: flex; flex-direction: column; gap: 4px; pointer-events: none; transition: all 0.3s ease; }
 .mission-item { font-size: 9px; color: var(--text); background: rgba(0,0,0,0.6); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(4px); display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.3s; }
 .mission-item.done { color: var(--accent); text-decoration: line-through; border-color: var(--accent); }
 
