@@ -100,7 +100,11 @@ function showDeckBuilder() {
     state.golfer = typeof GOLFERS !== 'undefined' ? GOLFERS[0] : null;
 
     function renderStep1() {
+        // Truco para obligar a Safari a repintar el contenido sin fallos
+        grid.style.display = 'none';
         grid.innerHTML = '';
+        grid.style.display = 'flex';
+        
         counter.style.display = 'none';
         const tGolfers = document.createElement('div');
         tGolfers.className = 'db-title';
@@ -132,13 +136,19 @@ function showDeckBuilder() {
                     <div class="card-tooltip">${g.desc}</div>
                 `;
                 div.onclick = () => {
-                    cGolfers.querySelectorAll('.golfer-card').forEach(x => { x.classList.remove('selected'); x.querySelector('.card-badge').style.display='none'; });
-                    div.classList.add('selected'); div.querySelector('.card-badge').style.display='flex';
+                    cGolfers.querySelectorAll('.golfer-card').forEach(x => { 
+                        x.classList.remove('selected', 'show-tooltip'); 
+                        x.querySelector('.card-badge').style.display='none'; 
+                    });
+                    div.classList.add('selected', 'show-tooltip'); 
+                    div.querySelector('.card-badge').style.display='flex';
+                    
+                    // Mostramos el tooltip 2.5s y lo ocultamos, sin usar mouseenter (perfecto para móvil)
+                    setTimeout(() => div.classList.remove('show-tooltip'), 2500);
+                    
                     state.golfer = g;
                     btn.disabled = false;
                 };
-                div.addEventListener('mouseenter', () => { cGolfers.querySelectorAll('.golfer-card').forEach(x=>x.classList.remove('show-tooltip')); div.classList.add('show-tooltip'); });
-                div.addEventListener('mouseleave', () => div.classList.remove('show-tooltip'));
                 cGolfers.appendChild(div);
             });
         }
@@ -148,7 +158,11 @@ function showDeckBuilder() {
     }
 
     function renderStep2() {
+        // Truco para obligar a Safari a repintar el contenido sin fallos
+        grid.style.display = 'none';
         grid.innerHTML = '';
+        grid.style.display = 'flex';
+        
         counter.style.display = 'block';
         const maxU = (typeof MAX_UPGRADES !== 'undefined') ? MAX_UPGRADES : 2;
         counter.textContent = `Mejoras: ${tU} / ${maxU}`;
